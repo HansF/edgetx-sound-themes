@@ -622,9 +622,9 @@ def fx_dialtone(dur, f, vel):
 
 
 def fx_dtmf(dur, f, vel):
-    """f picks a key: 0..11 via f index mapping."""
+    """The note number (mod 12) picks the keypad key: C=1, C#=2 ... B=#."""
     rows, cols = (697, 770, 852, 941), (1209, 1336, 1477)
-    k = int(f) % 12
+    k = int(round(69 + 12 * np.log2(f / 440.0))) % 12
     n = n_samples(dur)
     t = t_axis(n)
     return (np.sin(2 * np.pi * rows[k // 3] * t) + np.sin(2 * np.pi * cols[k % 3] * t)) * 0.5 * adsr(n, 0.003, release=0.005) * vel

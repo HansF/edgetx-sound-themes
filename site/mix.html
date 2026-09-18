@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mix your own · Stickbeats</title>
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  .tools { display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: end; padding: 16px; margin-bottom: 18px; }
+  .tools label { display: grid; gap: 4px; font: 600 11px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .tools select { font: 15px var(--body); padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); }
+  .tools .push { margin-left: auto; display: flex; gap: 10px; flex-wrap: wrap; }
+  .swatch { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 8px; vertical-align: middle; outline: 1px solid rgba(0,0,0,.15); }
+  .used { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 14px; font-size: 13px; color: var(--muted); }
+  .used span { background: var(--panel); outline: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; color: var(--ink); }
+  #status { font: 13px var(--mono); color: var(--muted); min-height: 1.4em; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="logo" href="index.html"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="2" y="7" width="28" height="22" rx="7" fill="currentColor"/><circle cx="10" cy="18" r="4.2" fill="var(--ground)"/><circle cx="22" cy="18" r="4.2" fill="var(--ground)"/><circle cx="10" cy="18" r="1.6" fill="var(--accent)"/><circle cx="22" cy="18" r="1.6" fill="currentColor"/><rect x="24" y="1" width="2.4" height="8" rx="1.2" fill="currentColor"/></svg>Stickbeats</a>
+    <nav class="nav" aria-label="Main"><a href="index.html">Themes</a><a href="compare.html">Compare</a><a href="mix.html">Mix your own</a><a href="install.html">Install</a><a href="https://github.com/HansF/edgetx-sound-themes">GitHub</a></nav>
+  </header>
+
+  <p class="eyebrow">Mix your own</p>
+  <h1 style="font-size:clamp(34px,5vw,56px);font-weight:900;margin:6px 0 10px">One pack, many themes</h1>
+  <p style="color:var(--muted);max-width:62ch;margin:0 0 22px">Boot like a 1989 handheld, arm with a vine boom, warn about the battery with a phonk cowbell. Pick a theme for each event and download your own SD card pack. Your picks live in the link, so you can share it.</p>
+
+  <div class="panel tools">
+    <label for="base">Start from<select id="base"></select></label>
+    <button class="btn ghost" id="fill" type="button">Use for every event</button>
+    <button class="btn ghost" id="random" type="button">Surprise me</button>
+    <div class="push">
+      <button class="btn ghost" id="share" type="button">Copy link</button>
+      <button class="btn accent" id="download" type="button">Download my mix</button>
+    </div>
+  </div>
+  <div class="used" id="used"></div>
+  <p id="status" aria-live="polite"></p>
+  <div class="panel board"><table><tbody id="rows"></tbody></table></div>
+  <footer class="site"><p>The zip contains <code>SOUNDS/en/…</code> with all 70 files, exactly like the ready-made packs. <a href="install.html">Install guide</a>.</p></footer>
+</div>
+<script src="assets/vendor/jszip.min.js"></script>
+<script src="assets/app.js"></script>
+<script>
+SB.markNav();
+SB.nowbar();
+SB.data().then((D) => {
+  const files = D.groups.flatMap((g) => g.files);
+  const ids = D.themes.map((t) => t.id);
+  const pick = {};
+  // link format: #<theme index base36 per event, 2 chars each>
+  const encode = () => files.map((f) => ids.indexOf(pick[f]).toString(36).padStart(2, "0")).join("");
+  const decode = (s) => { if (s.length !== files.length * 2) return false; files.forEach((f, i) => { const t = ids[parseInt(s.substr(i * 2, 2), 36)]; if (t) pick[f] = t; }); return true; };
+  const base = document.getElementById("base");
+  D.themes.forEach((t) => base.appendChild(new Option(t.name, t.id)));
+  base.value = ids.includes("8bit-hero") ? "8bit-hero" : ids[0];
+  if (!decode(location.hash.slice(1))) files.forEach((f) => (pick[f] = base.value));
+
+  const options = D.categories.map((c) => {
+    const ts = D.themes.filter((t) => t.category === c.id);
+    return ts.length ? `<optgroup label="${SB.esc(c.name)}">${ts.map((t) => `<option value="${t.id}">${SB.esc(t.name)}</option>`).join("")}</optgroup>` : "";
+  }).join("");
+  const rows = document.getElementById("rows");
+  rows.innerHTML = D.groups.map((g) => `<tr class="group"><th colspan="4">${SB.esc(g.name)}</th></tr>` + g.files.map((f) => `
+    <tr>
+      <td style="width:46px"><button class="play" type="button" data-f="${f}" aria-label="Play ${SB.esc(D.eventBy[f].label)}">${SB.PLAY_SVG}</button></td>
+      <td><span class="lbl">${SB.esc(D.eventBy[f].label)}</span></td>
+      <td class="file">${f}.wav</td>
+      <td class="act"><label hidden for="s-${f}">Theme for ${SB.esc(D.eventBy[f].label)}</label><select id="s-${f}" data-f="${f}">${options}</select></td>
+    </tr>`).join("")).join("");
+  const sync = () => {
+    rows.querySelectorAll("select").forEach((s) => (s.value = pick[s.dataset.f]));
+    history.replaceState(null, "", "#" + encode());
+    const n = {};
+    files.forEach((f) => (n[pick[f]] = (n[pick[f]] || 0) + 1));
+    document.getElementById("used").innerHTML = "In this mix: " + Object.entries(n).sort((a, b) => b[1] - a[1])
+      .map(([id, c]) => `<span><i class="swatch" style="background:${D.byId[id].skin.accent}"></i>${SB.esc(D.byId[id].name)} × ${c}</span>`).join("");
+  };
+  sync();
+  rows.addEventListener("change", (e) => { const s = e.target.closest("select"); if (!s) return; pick[s.dataset.f] = s.value; sync(); play(s.dataset.f); });
+  const play = (f, el) => { const t = D.byId[pick[f]]; SB.play(t.clips[f], { text: `${t.name} · ${D.eventBy[f].label}` }, el || rows.querySelector(`.play[data-f="${CSS.escape(f)}"]`)); };
+  rows.addEventListener("click", (e) => { const b = e.target.closest(".play"); if (b) play(b.dataset.f, b); });
+  document.getElementById("fill").onclick = () => { files.forEach((f) => (pick[f] = base.value)); sync(); };
+  document.getElementById("random").onclick = () => {
+    // keep groups coherent-ish: one random theme per group, a few wildcards
+    D.groups.forEach((g) => { const t = ids[Math.floor(Math.random() * ids.length)]; g.files.forEach((f) => (pick[f] = Math.random() < 0.2 ? ids[Math.floor(Math.random() * ids.length)] : t)); });
+    sync();
+  };
+  const status = document.getElementById("status");
+  document.getElementById("share").onclick = async () => {
+    try { await navigator.clipboard.writeText(location.href); status.textContent = "Link copied."; }
+    catch (e) { status.textContent = "Copy this address: " + location.href; }
+  };
+  document.getElementById("download").onclick = async () => {
+    status.textContent = "Collecting 70 files…";
+    const zip = new JSZip();
+    const readme = "Stickbeats custom mix\n\n" + files.map((f) => `${f}.wav  <-  ${D.byId[pick[f]].name}`).join("\n") +
+      "\n\nCopy the SOUNDS folder onto the root of your EdgeTX SD card.\nSounds: CC0 1.0. https://hansf.github.io/edgetx-sound-themes/\nRebuild this mix: " + location.href + "\n";
+    try {
+      await Promise.all(files.map(async (f) => {
+        const r = await fetch(`wav/${D.byId[pick[f]].clips[f]}.wav`);
+        if (!r.ok) throw new Error(`${f}.wav (${r.status})`);
+        zip.file(`SOUNDS/en/${f}.wav`, await r.arrayBuffer());
+      }));
+      zip.file("README.txt", readme);
+      const blob = await zip.generateAsync({ type: "blob", compression: "DEFLATE" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "stickbeats-mix.zip";
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+      status.textContent = `Downloaded stickbeats-mix.zip (${SB.size(blob.size)}).`;
+    } catch (e) {
+      status.textContent = "Download failed: could not fetch " + e.message + ". Check your connection and try again.";
+    }
+  };
+});
+</script>
+</body>
+</html>

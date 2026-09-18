@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Install · Stickbeats</title>
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="logo" href="index.html"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="2" y="7" width="28" height="22" rx="7" fill="currentColor"/><circle cx="10" cy="18" r="4.2" fill="var(--ground)"/><circle cx="22" cy="18" r="4.2" fill="var(--ground)"/><circle cx="10" cy="18" r="1.6" fill="var(--accent)"/><circle cx="22" cy="18" r="1.6" fill="currentColor"/><rect x="24" y="1" width="2.4" height="8" rx="1.2" fill="currentColor"/></svg>Stickbeats</a>
+    <nav class="nav" aria-label="Main"><a href="index.html">Themes</a><a href="compare.html">Compare</a><a href="mix.html">Mix your own</a><a href="install.html">Install</a><a href="https://github.com/HansF/edgetx-sound-themes">GitHub</a></nav>
+  </header>
+
+  <article class="prose">
+    <p class="eyebrow">Install</p>
+    <h1 style="font-size:clamp(34px,5vw,56px);font-weight:900;margin:6px 0 16px">Three minutes, one folder</h1>
+    <p>Every pack is a <code>SOUNDS</code> folder laid out exactly like the one on your radio's SD card. Copying it over replaces only the sounds in the pack.</p>
+
+    <ol class="steps">
+      <li><div><strong>Download a pack.</strong> Pick one from the <a href="index.html#themes">themes</a>, or <a href="mix.html">build a mix</a>.</div></li>
+      <li><div><strong>Connect the SD card.</strong> Plug the radio into your computer and choose <em>USB Storage (SD)</em>, or take the card out.</div></li>
+      <li><div><strong>Back up your sounds.</strong> Copy the card's existing <code>SOUNDS/en</code> folder somewhere safe, so you can go back.</div></li>
+      <li><div><strong>Copy the pack.</strong> Unzip it, then drag its <code>SOUNDS</code> folder onto the root of the card and choose to replace the existing files.</div></li>
+      <li><div><strong>Eject and listen.</strong> Unplug and power-cycle the radio. The boot sound is the first thing you'll hear.</div></li>
+    </ol>
+
+    <h2>What's in a pack</h2>
+    <div class="tree">SD card
+└── SOUNDS
+    └── en
+        ├── armed.wav  disarm.wav  lowbat.wav  clobat.wav  flip.wav …
+        ├── fm-1.wav … fm-8.wav      flight mode 1–8 (1–8 rising notes)
+        ├── rates1.wav … rates6.wav
+        └── SYSTEM
+            ├── hello.wav            radio boot
+            ├── telemko.wav          telemetry lost
+            ├── telemok.wav          telemetry recovered
+            ├── rssi_org.wav         RF signal low
+            ├── rssi_red.wav         RF signal critical
+            ├── thralert.wav         throttle warning
+            ├── swalert.wav          switch warning
+            └── timovr1.wav …        timers, trims, trainer, errors</div>
+    <p class="muted">70 files per pack, all 16 kHz, mono, 16-bit PCM WAV: the format EdgeTX plays.</p>
+
+    <h2>What stays the same</h2>
+    <p>Packs only replace event sounds. Spoken numbers, units and telemetry readouts (<code>SYSTEM/0000.wav</code> to <code>0112.wav</code>, <code>volt0.wav</code> and friends) are not touched, so "battery 3.7 volts" still sounds like your voice pack.</p>
+    <p>Files in the root of <code>SOUNDS/en</code>, such as <code>armed.wav</code> or <code>lowbat.wav</code>, only play when a Special Function or a Lua script asks for them. The <code>SYSTEM</code> sounds play automatically.</p>
+
+    <h2>Using them in your model</h2>
+    <p>In <em>Model → Special Functions</em>, add <em>Play Track</em> on a switch and pick the file: for example <code>armed</code> on SA↓ and <code>disarm</code> on SA↑. Flight-mode switches work well with <code>fm-1</code> to <code>fm-3</code>: you hear one, two or three rising notes.</p>
+
+    <h2>Other languages</h2>
+    <p>If your radio uses another voice language, rename the pack's <code>en</code> folder to your language code, such as <code>de</code>, <code>fr</code> or <code>nl</code>, before copying.</p>
+
+    <h2>Safety</h2>
+    <p>Every theme has to pass the same checks before it's published:</p>
+    <ul>
+      <li>Critical alerts, like critical battery and RF critical, repeat at least three times with real gaps, even in the joke themes.</li>
+      <li>Alerts last at most 1.2 seconds, and nothing lasts longer than 2 seconds.</li>
+      <li>All packs are loudness-matched.</li>
+    </ul>
+    <p>Still, listen to your pack on the ground first, so you know what trouble sounds like before you're in the air.</p>
+
+    <h2>How it's made</h2>
+    <p>Every sound is written as MIDI, then rendered by a small custom synth: NES-style pulse and triangle channels, Game Boy wave tables, FM operators, Karplus-Strong strings, drum machines and a box of sound-effect generators. Orchestral and acoustic instruments come from the free GeneralUser GS soundfont via FluidSynth. The MIDI files come with each theme, so you can remix them. The code is on <a href="https://github.com/HansF/edgetx-sound-themes">GitHub</a>.</p>
+  </article>
+  <footer class="site"><p>Sounds CC0, code MIT. Not affiliated with EdgeTX.</p></footer>
+</div>
+<script src="assets/app.js"></script>
+<script>SB.markNav();</script>
+</body>
+</html>

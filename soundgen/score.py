@@ -56,6 +56,12 @@ class Track:
         self.notes.append(Note(pitch_of(pitch), t, dur, vel, **kw))
         return t + dur
 
+    def chord(self, pitches, t, dur, vel=0.8, **kw):
+        """note() for a "C4+E4+G4" chord."""
+        for p in pitches.split("+"):
+            self.note(p, t, dur, vel, **kw)
+        return t + dur
+
     def seq(self, notes, step, t=0.0, vel=0.8, gap=0.1, **kw):
         for tok in notes.split():
             name, _, mult = tok.partition("*")

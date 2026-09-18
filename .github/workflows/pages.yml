@@ -1,0 +1,64 @@
+name: Build and deploy site
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+env:
+  SF2_COMMIT: 684543d5e5efaef08d02be50dcda8d552478fa60
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install FluidSynth and FFmpeg
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends fluidsynth ffmpeg
+
+      - name: Cache soundfont
+        id: sf2
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/edgetx-sound-themes/GeneralUser-GS.sf2
+          key: sf2-${{ env.SF2_COMMIT }}
+
+      - name: Download GeneralUser GS soundfont
+        if: steps.sf2.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/.cache/edgetx-sound-themes
+          curl -fsSL -o ~/.cache/edgetx-sound-themes/GeneralUser-GS.sf2 \
+            "https://raw.githubusercontent.com/mrbumpy409/GeneralUser-GS/${SF2_COMMIT}/GeneralUser-GS.sf2"
+
+      - uses: astral-sh/setup-uv@v6
+
+      - name: Test every theme
+        run: uv run pytest -q
+
+      - name: Build packs and site
+        run: uv run build.py --site
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

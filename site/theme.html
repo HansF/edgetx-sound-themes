@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Theme · Stickbeats</title>
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  /* The theme's own skin takes over this page. */
+  body.skinned { background: var(--t-bg); color: var(--t-on-bg); }
+  .skinned .top, .skinned .top .nav a { color: var(--t-on-bg); }
+  .skinned .top .nav a { opacity: .75; }
+  .skinned .top .nav a:hover { opacity: 1; }
+  .skinned .logo svg circle:first-of-type, .skinned .logo svg circle:nth-of-type(2) { fill: var(--t-bg); }
+  .t-hero { padding-block: clamp(16px, 4vw, 44px) 28px; display: grid; gap: 14px; max-width: 900px; }
+  .t-hero h1 { font-family: var(--t-font), var(--display); font-variation-settings: normal; font-weight: 400; font-size: clamp(38px, 7vw, 86px); line-height: 1.02; }
+  .t-hero .tagline { font-size: clamp(18px, 2vw, 22px); font-weight: 600; margin: 0; }
+  .t-hero .blurb { max-width: 62ch; margin: 0; opacity: .88; }
+  .t-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+  .t-actions .btn { background: var(--t-accent); color: var(--t-accent-ink); }
+  .t-actions .btn.ghost { background: transparent; color: var(--t-on-bg); }
+  .t-meta { display: flex; flex-wrap: wrap; gap: 6px 22px; font: 13px var(--mono); opacity: .8; }
+  .sheet { background: var(--t-surface); color: var(--t-ink); border-radius: 14px; padding: 6px clamp(4px, 2vw, 14px) 14px; margin-top: 22px; }
+  .sheet .board th, .sheet .board td { border-color: color-mix(in srgb, var(--t-ink) 14%, transparent); }
+  .sheet .board td.file, .sheet .board td.num, .sheet .board tr.group th, .sheet .board a.tiny { color: color-mix(in srgb, var(--t-ink) 72%, transparent); }
+  .sheet .board a.tiny:hover { color: var(--t-ink); }
+  .sheet .play { background: var(--t-ink); color: var(--t-surface); }
+  .sheet .play.playing { background: var(--t-accent); color: var(--t-accent-ink); }
+  .sheet .board tr.dup .lbl::after { color: color-mix(in srgb, var(--t-ink) 55%, transparent); }
+  .pager { display: flex; justify-content: space-between; gap: 16px; margin-top: 28px; flex-wrap: wrap; }
+  .pager a { text-decoration: none; font-weight: 600; }
+  .pager a span { display: block; font: 12px var(--mono); opacity: .7; font-weight: 400; }
+  .skinned footer.site { color: var(--t-on-bg); border-color: color-mix(in srgb, var(--t-on-bg) 25%, transparent); opacity: .85; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="logo" href="index.html"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="2" y="7" width="28" height="22" rx="7" fill="currentColor"/><circle cx="10" cy="18" r="4.2" fill="var(--ground)"/><circle cx="22" cy="18" r="4.2" fill="var(--ground)"/><circle cx="10" cy="18" r="1.6" fill="var(--accent)"/><circle cx="22" cy="18" r="1.6" fill="currentColor"/><rect x="24" y="1" width="2.4" height="8" rx="1.2" fill="currentColor"/></svg>Stickbeats</a>
+    <nav class="nav" aria-label="Main"><a href="index.html">Themes</a><a href="compare.html">Compare</a><a href="mix.html">Mix your own</a><a href="install.html">Install</a><a href="https://github.com/HansF/edgetx-sound-themes">GitHub</a></nav>
+  </header>
+
+  <section class="t-hero">
+    <p class="eyebrow" id="cat" style="color:inherit;opacity:.75">&nbsp;</p>
+    <h1 id="name">Loading…</h1>
+    <p class="tagline" id="tagline"></p>
+    <p class="blurb" id="blurb"></p>
+    <div class="t-meta" id="meta"></div>
+    <div class="t-actions">
+      <a class="btn" id="dl" href="#" download>Download EdgeTX pack</a>
+      <a class="btn ghost" id="dl-midi" href="#" download>MIDI sources</a>
+      <button class="btn ghost" id="play-all" type="button">▶ Play every sound</button>
+    </div>
+  </section>
+
+  <div class="sheet"><div class="board"><table><tbody id="rows"></tbody></table></div></div>
+
+  <nav class="pager" id="pager" aria-label="Other themes"></nav>
+  <footer class="site"><p>Copy the pack's <code>SOUNDS</code> folder to your SD card root. <a href="install.html">Install guide</a>. Sounds CC0, code MIT.</p></footer>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+SB.markNav();
+SB.nowbar();
+SB.data().then((D) => {
+  const t = D.byId[SB.param("t")] || D.themes[0];
+  const sk = t.skin;
+  SB.loadFonts([sk.font]);
+  document.title = `${t.name} · Stickbeats`;
+  document.body.classList.add("skinned");
+  document.body.setAttribute("style", SB.skinVars(sk) + `;--t-accent-ink:${SB.readable(sk.accent, sk.surface, "#ffffff")}`);
+  document.getElementById("cat").textContent = D.catName[t.category];
+  document.getElementById("name").textContent = t.name;
+  document.getElementById("tagline").textContent = t.tagline;
+  document.getElementById("blurb").textContent = t.blurb;
+  document.getElementById("meta").innerHTML =
+    `<span>${Object.keys(t.clips).length} files</span><span>${t.unique} different sounds</span><span>16 kHz mono WAV</span><span>composed in MIDI</span>`;
+  const dl = document.getElementById("dl");
+  dl.href = `dl/${t.id}.zip`;
+  dl.innerHTML = `Download EdgeTX pack <small>${SB.size(t.zip)}</small>`;
+  const dm = document.getElementById("dl-midi");
+  dm.href = `dl/${t.id}-midi.zip`;
+  dm.innerHTML = `MIDI sources <small>${SB.size(t.midizip)}</small>`;
+
+  const seen = new Set(), rows = [];
+  for (const g of D.groups) {
+    rows.push(`<tr class="group"><th colspan="4">${SB.esc(g.name)}</th></tr>`);
+    for (const f of g.files) {
+      const h = t.clips[f], ev = D.eventBy[f], dup = seen.has(h);
+      seen.add(h);
+      const base = f.split("/").pop();
+      rows.push(`<tr class="${dup ? "dup" : ""}">
+        <td style="width:46px">${SB.playButton("Play " + ev.label)}</td>
+        <td><span class="lbl">${SB.esc(ev.label)}</span></td>
+        <td class="file">${f}.wav</td>
+        <td class="num act">${t.durs[f].toFixed(2)}s<a class="tiny" href="wav/${h}.wav" download="${base}.wav" aria-label="Download ${base}.wav">wav</a></td>
+      </tr>`.replace('class="play"', `class="play" data-f="${f}"`));
+    }
+  }
+  const tbody = document.getElementById("rows");
+  tbody.innerHTML = rows.join("");
+  tbody.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-f]");
+    if (b) SB.play(t.clips[b.dataset.f], { text: `${t.name} · ${D.eventBy[b.dataset.f].label} · ${b.dataset.f}.wav` }, b);
+  });
+  document.getElementById("play-all").onclick = () => {
+    const done = new Set(), items = [];
+    tbody.querySelectorAll("[data-f]").forEach((b) => {
+      const h = t.clips[b.dataset.f];
+      if (!done.has(h)) { done.add(h); items.push({ hash: h, el: b, info: { text: `${t.name} · ${D.eventBy[b.dataset.f].label}` } }); }
+    });
+    SB.queue(items);
+  };
+
+  const i = D.themes.indexOf(t), n = D.themes.length;
+  const prev = D.themes[(i - 1 + n) % n], next = D.themes[(i + 1) % n];
+  document.getElementById("pager").innerHTML =
+    `<a href="theme.html?t=${prev.id}"><span>← Previous</span>${SB.esc(prev.name)}</a><a href="theme.html?t=${next.id}" style="text-align:right"><span>Next →</span>${SB.esc(next.name)}</a>`;
+});
+</script>
+</body>
+</html>

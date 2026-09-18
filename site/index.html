@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Stickbeats</title>
+<meta name="description" content="Free sound themes for EdgeTX radios. Every beep, alarm and callout re-composed: chiptune, space opera, theme parks, phonk, cats. Download ready-to-copy SD card packs.">
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="logo" href="index.html"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="2" y="7" width="28" height="22" rx="7" fill="currentColor"/><circle cx="10" cy="18" r="4.2" fill="var(--ground)"/><circle cx="22" cy="18" r="4.2" fill="var(--ground)"/><circle cx="10" cy="18" r="1.6" fill="var(--accent)"/><circle cx="22" cy="18" r="1.6" fill="currentColor"/><rect x="24" y="1" width="2.4" height="8" rx="1.2" fill="currentColor"/></svg>Stickbeats</a>
+    <nav class="nav" aria-label="Main"><a href="index.html">Themes</a><a href="compare.html">Compare</a><a href="mix.html">Mix your own</a><a href="install.html">Install</a><a href="https://github.com/HansF/edgetx-sound-themes">GitHub</a></nav>
+  </header>
+
+  <section class="hero">
+    <div>
+      <p class="eyebrow">Sound themes for EdgeTX radios</p>
+      <h1>Your radio, with a <em>soundtrack</em>.</h1>
+      <p class="lede"><span id="n-themes">Dozens of</span> free sound packs that replace your transmitter's beeps, warnings and callouts: 8-bit consoles, space opera, theme parks, drift phonk, cats. Every sound is composed in MIDI and ready to copy onto the SD card.</p>
+      <div class="ctas"><a class="btn accent" href="#themes">Browse themes</a><a class="btn ghost" href="mix.html">Build a mix</a></div>
+    </div>
+
+    <div class="radio" aria-label="Try the themes">
+      <div class="radio-row"><span class="radio-brand">Try it · flip the switch</span><span class="led" id="led"></span></div>
+      <div class="lcd">
+        <div class="lcd-top"><span id="lcd-cat">—</span><span id="lcd-dur"></span></div>
+        <div class="lcd-name" id="lcd-name">Loading…</div>
+        <div class="lcd-sub" id="lcd-sub">&nbsp;</div>
+        <canvas id="lcd-scope" aria-hidden="true"></canvas>
+      </div>
+      <div class="radio-controls">
+        <button class="toggle" id="arm" role="switch" aria-checked="false" type="button">
+          <span class="slot"><span class="lever"></span></span>
+          <span class="tlabel">Switch SA<b id="arm-state">Disarmed</b></span>
+        </button>
+        <div style="display:grid;gap:12px;min-width:0">
+          <div class="selector">
+            <button class="round" id="prev" type="button" aria-label="Previous theme">◀</button>
+            <label for="theme-select" hidden>Theme</label>
+            <select id="theme-select"></select>
+            <button class="round" id="next" type="button" aria-label="Next theme">▶</button>
+          </div>
+          <div class="keys" id="keys"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="themes">
+    <div class="section-head">
+      <h2>Pick a sound theme</h2>
+      <div class="filters" id="filters" role="group" aria-label="Filter by category"></div>
+    </div>
+    <div class="grid" id="grid"></div>
+    <p style="margin-top:22px;color:var(--muted)">Want all of them? <a id="all-dl" href="dl/all-themes.zip" download>Download every pack in one zip</a>.</p>
+  </section>
+
+  <footer class="site">
+    <p>Sounds are released under CC0: use them however you like. Code is MIT. Stickbeats is a fan project and not affiliated with EdgeTX or any game, film or TV show. The themes are original music in the spirit of their eras.</p>
+    <p><a href="install.html">How to install</a> · <a href="https://github.com/HansF/edgetx-sound-themes">Source on GitHub</a></p>
+  </footer>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+const KEYS = [
+  ["SYSTEM/hello", "Boot"], ["lowbat", "Low battery"], ["SYSTEM/telemko", "Telemetry lost"],
+  ["SYSTEM/telemok", "Telemetry back"], ["flip", "Flip"], ["takeof", "Take off"],
+  ["SYSTEM/timovr1", "Timer"], ["SYSTEM/swalert", "Switch alert"], ["clobat", "Critical batt", "crit"],
+];
+const CARD_SAMPLES = [["armed", "Arm"], ["disarm", "Disarm"], ["lowbat", "Low batt"], ["sigcrt", "Signal crit"], ["flip", "Flip"]];
+
+SB.markNav();
+SB.data().then((D) => {
+  SB.loadFonts(D.themes.map((t) => t.skin.font));
+  document.getElementById("n-themes").textContent = D.themes.length;
+  document.getElementById("all-dl").textContent = `Download every pack in one zip (${SB.size(D.allzip)})`;
+
+  // ---------- hero transmitter
+  const sel = document.getElementById("theme-select");
+  D.categories.forEach((c) => {
+    const og = document.createElement("optgroup");
+    og.label = c.name;
+    D.themes.filter((t) => t.category === c.id).forEach((t) => og.appendChild(new Option(t.name, t.id)));
+    if (og.children.length) sel.appendChild(og);
+  });
+  const ids = D.themes.map((t) => t.id);
+  const start = (location.hash.slice(1) && D.byId[location.hash.slice(1)]) ? location.hash.slice(1) : ids[Math.floor(Math.random() * ids.length)];
+  sel.value = start;
+  const theme = () => D.byId[sel.value];
+  const lcd = (name, sub, dur) => {
+    document.getElementById("lcd-name").textContent = name;
+    document.getElementById("lcd-sub").textContent = sub;
+    document.getElementById("lcd-dur").textContent = dur || "";
+  };
+  const showTheme = () => {
+    const t = theme();
+    document.getElementById("lcd-cat").textContent = D.catName[t.category];
+    lcd(t.name, t.tagline);
+  };
+  showTheme();
+  const fire = (file, el) => {
+    const t = theme();
+    const ev = D.eventBy[file];
+    lcd(t.name, `${ev.label} · SOUNDS/en/${file}.wav`, t.durs[file].toFixed(2) + "s");
+    SB.play(t.clips[file], { text: `${t.name} · ${ev.label}` }, el);
+  };
+  const step = (d) => { sel.value = ids[(ids.indexOf(sel.value) + d + ids.length) % ids.length]; showTheme(); fire("SYSTEM/hello"); };
+  sel.onchange = () => { showTheme(); fire("SYSTEM/hello"); };
+  document.getElementById("prev").onclick = () => step(-1);
+  document.getElementById("next").onclick = () => step(1);
+  const keys = document.getElementById("keys");
+  KEYS.forEach(([file, label, cls]) => {
+    const b = document.createElement("button");
+    b.className = "key" + (cls ? " " + cls : "");
+    b.type = "button";
+    b.textContent = label;
+    b.onclick = () => fire(file, b);
+    keys.appendChild(b);
+  });
+  const arm = document.getElementById("arm");
+  arm.onclick = () => {
+    const on = arm.getAttribute("aria-checked") !== "true";
+    arm.setAttribute("aria-checked", on);
+    document.getElementById("arm-state").textContent = on ? "Armed" : "Disarmed";
+    fire(on ? "armed" : "disarm");
+  };
+  const led = document.getElementById("led");
+  SB.onPlay((s) => led.classList.toggle("on", s.state === "play"));
+  const css = getComputedStyle(document.documentElement);
+  SB.scope(document.getElementById("lcd-scope"), () => ({ ink: css.getPropertyValue("--lcd-ink"), dim: css.getPropertyValue("--lcd-dim") }));
+
+  // ---------- grid
+  const grid = document.getElementById("grid");
+  grid.innerHTML = D.themes.map((t) => `
+    <article class="card" data-cat="${t.category}" style="${SB.skinVars(t.skin)}">
+      <div class="card-label">
+        <span class="cat">${SB.esc(D.catName[t.category])}</span>
+        <h3 style="font-family:${SB.fontStack(t.skin.font)}">${SB.esc(t.name)}</h3>
+        <p class="tag">${SB.esc(t.tagline)}</p>
+        <button class="play boot" data-t="${t.id}" data-f="SYSTEM/hello" aria-label="Play ${SB.esc(t.name)} boot sound">${SB.PLAY_SVG}</button>
+      </div>
+      <div class="card-body">
+        <div class="samples">${CARD_SAMPLES.map(([f, l]) => `<button class="sample" data-t="${t.id}" data-f="${f}">${l}</button>`).join("")}</div>
+        <div class="card-foot">
+          <a class="open" href="theme.html?t=${t.id}">All ${Object.keys(t.clips).length} sounds →</a>
+          <a class="dl" href="dl/${t.id}.zip" download>ZIP · ${SB.size(t.zip)}</a>
+        </div>
+      </div>
+    </article>`).join("");
+  grid.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-t]");
+    if (!b) return;
+    const t = D.byId[b.dataset.t];
+    SB.play(t.clips[b.dataset.f], { text: `${t.name} · ${D.eventBy[b.dataset.f].label}` }, b);
+  });
+
+  // ---------- filters
+  const filters = document.getElementById("filters");
+  const counts = (c) => D.themes.filter((t) => !c || t.category === c).length;
+  const cats = [{ id: "", name: "All" }, ...D.categories.filter((c) => counts(c.id))];
+  filters.innerHTML = cats.map((c) => `<button class="chip" type="button" data-c="${c.id}" aria-pressed="${c.id === ""}">${SB.esc(c.name)}<span class="n">${counts(c.id)}</span></button>`).join("");
+  filters.onclick = (e) => {
+    const b = e.target.closest("[data-c]");
+    if (!b) return;
+    filters.querySelectorAll(".chip").forEach((x) => x.setAttribute("aria-pressed", x === b));
+    grid.querySelectorAll(".card").forEach((card) => (card.hidden = b.dataset.c && card.dataset.cat !== b.dataset.c));
+  };
+});
+</script>
+</body>
+</html>

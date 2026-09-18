@@ -8,7 +8,7 @@ class EightBitHero(Theme):
     category = "retro"
     tagline = "Pulse, triangle, noise. Nothing else."
     blurb = ("Two square channels, a stepped triangle bass and the noise channel of a 1985 console. "
-             "Coins, jumps, pipes and power-ups for every radio event.")
+             "Pickups, jumps, warps and level-ups for every radio event.")
     skin = {"bg": "#5c94fc", "surface": "#fcfcfc", "ink": "#000000", "muted": "#3c3c3c",
             "accent": "#e45c10", "font": "Press Start 2P"}
     root, scale, step = "C6", MAJOR, 0.075
@@ -28,22 +28,24 @@ class EightBitHero(Theme):
         s.track("kit:chip", 0.6).beat({"kick": "x...x...", "hat": "..x...x."}, 0.055)
         return s
 
-    def arm(self):                       # extra life
+    def arm(self):                       # ready, player one (original motif)
         s = self.score()
-        s.track("chip:p50").seq("E6 G6 E7 C7 D7 G7*2", 0.075, gap=0.05)
+        s.track("chip:p50").seq("G5 D6 B6 A6 D7*3", 0.07, gap=0.05)
+        s.track("chip:tri", 0.8).seq("G3*2 D4*2 G4*3", 0.07)
         return s
 
-    def disarm(self):                    # down the pipe
+    def disarm(self):                    # warp out
         s = self.score()
         for i in range(3):
             s.track("chip:p50").note("F5", i * 0.14, 0.11, bend=-17, steps=8)
         return s
 
-    def yes(self):                       # coin
+    def yes(self):                       # gem pickup (original: fifth up + sparkle)
         s = self.score()
         tr = s.track("chip:p25")
-        tr.note("B5", 0, 0.07)
-        tr.note("E6", 0.07, 0.4, decay=0.14)
+        tr.note("C6", 0, 0.05)
+        tr.note("G6", 0.05, 0.05)
+        tr.note("C7", 0.1, 0.32, decay=0.11)
         return s
 
     def no(self):                        # bump
@@ -52,9 +54,9 @@ class EightBitHero(Theme):
         s.track("chip:noise", 0.5).note("C4", 0, 0.07, decay=0.025)
         return s
 
-    def found(self):                     # power-up
+    def found(self):                     # level up (original: climbing broken chords)
         s = self.score()
-        s.track("chip:p50").seq("C5 E5 G5 C6 D5 F#5 A5 D6 E5 G#5 B5 E6 F5 A5 C6 F6", 0.035, gap=0)
+        s.track("chip:p50").seq("A4 E5 C#6 B4 F#5 D#6 C#5 G#5 E6 A6*3", 0.042, gap=0.05)
         return s
 
     def lost(self):                      # falling into the pit
@@ -75,9 +77,9 @@ class EightBitHero(Theme):
         s.track("chip:tri").note("G3", t + 0.03, 0.35, bend=-12)
         return s
 
-    def signal_warn(self):               # pause jingle-ish two-tone
+    def signal_warn(self):               # two-tone caution
         s = self.score()
-        s.track("chip:p25").seq("E6 C6 E6 C6", 0.08)
+        s.track("chip:p25").seq("A6 D6 R A6 D6", 0.075)
         return s
 
     def signal_crit(self):
@@ -119,7 +121,7 @@ class EightBitHero(Theme):
         s.track("chip:noise", 0.5).note("C4", 0.72, 0.07, decay=0.025)
         return s
 
-    def home(self):                      # castle-clear style fanfare (original)
+    def home(self):                      # stage-clear style fanfare (original)
         s = self.score()
         s.track("chip:p25").seq("G5 C6 E6 G6*2 E6 G6*4", 0.08)
         s.track("chip:p50", 0.5).seq("E5 G5 C6 E6*2 C6 E6*4", 0.08)

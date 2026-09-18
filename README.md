@@ -42,8 +42,11 @@ uv run pytest -q                 # every theme must pass the safety checks
 uv run build.py                  # all packs -> out/<theme>/SOUNDS/en + out/<theme>/midi
 uv run build.py cat-mode         # one theme
 uv run build.py --site           # + site/data, previews, zips; then serve site/
-uv run build.py 8bit-hero --private ~/my-sounds   # overlay your own WAVs -> private/ (never published)
+uv run build.py --private        # + personal themes from private_themes/ (gitignored) -> private/
+uv run build.py --private --masters ~/my-sounds   # ...with your own WAVs layered on top
 ```
+
+`private_themes/` is for packs you keep to yourself, such as recreations of copyrighted game sounds. It is gitignored, never built by CI and never published.
 
 Pushing to `main` runs the tests, builds everything and deploys `site/` to GitHub Pages (`.github/workflows/pages.yml`).
 

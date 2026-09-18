@@ -8,3 +8,8 @@ site/audio/
 site/dl/
 site/wav/
 private_themes/
+voices-src/
+
+site/sitemap.xml
+site/v/
+site/robots.txt

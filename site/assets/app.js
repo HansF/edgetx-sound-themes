@@ -13,7 +13,17 @@
     d.catName = Object.fromEntries(d.categories.map((c) => [c.id, c.name]));
     return d;
   }));
+  let voicesP;
+  SB.voices = () => (voicesP = voicesP || fetch("data/voices.json").then((r) => (r.ok ? r.json() : { voices: [], languages: [], previews: [], english: {} })).then((d) => {
+    d.byId = Object.fromEntries(d.voices.map((v) => [v.id, v]));
+    d.hosted = d.voices.filter((v) => v.hosted);
+    return d;
+  }).catch(() => ({ voices: [], languages: [], previews: [], english: {}, byId: {}, hosted: [] })));
   SB.param = (k) => new URLSearchParams(location.search).get(k);
+  SB.GENDER = { m: "male", f: "female", x: "synthetic" };
+  /** the name a phrase file shows: the voice's own text, else the English source, else the file */
+  SB.phraseText = (V, v, f) => (v.texts && v.texts[f]) || V.english[f] || f;
+  SB.playSeq = (items) => SB.queue(items, 60);
   SB.size = (b) => (b > 1e6 ? (b / 1e6).toFixed(1) + " MB" : Math.round(b / 1e3) + " KB");
   SB.esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
@@ -143,7 +153,32 @@
   };
   SB.markNav = () => {
     const page = location.pathname.split("/").pop() || "index.html";
-    document.querySelectorAll(".nav a").forEach((a) => { if (a.getAttribute("href") === page) a.setAttribute("aria-current", "page"); });
+    document.querySelectorAll(".nav a").forEach((a) => {
+      const href = (a.getAttribute("href") || "").split("#")[0];
+      if (href === page && !(page === "index.html" && a.getAttribute("href").includes("#") && !location.hash)) a.setAttribute("aria-current", "page");
+    });
+    SB.themeToggle();
   };
+  /** light / dark switch in the header; remembers the choice */
+  SB.themeToggle = () => {
+    const top = document.querySelector(".top");
+    if (!top || top.querySelector(".mode")) return;
+    const b = document.createElement("button");
+    b.className = "mode"; b.type = "button"; b.setAttribute("aria-label", "Switch light or dark mode");
+    const paint = () => {
+      const dark = document.documentElement.dataset.theme === "dark" || (!document.documentElement.dataset.theme && matchMedia("(prefers-color-scheme: dark)").matches);
+      b.innerHTML = dark ? '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5M17.5 17.5 19 19M5 19l1.5-1.5M17.5 6.5 19 5"/></svg>'
+                        : '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+    };
+    b.onclick = () => {
+      const dark = document.documentElement.dataset.theme === "dark" || (!document.documentElement.dataset.theme && matchMedia("(prefers-color-scheme: dark)").matches);
+      document.documentElement.dataset.theme = dark ? "light" : "dark";
+      try { localStorage.setItem("sb-theme", document.documentElement.dataset.theme); } catch (e) {}
+      paint();
+    };
+    paint();
+    top.appendChild(b);
+  };
+  try { const t = localStorage.getItem("sb-theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") SB.stop(); });
 })();

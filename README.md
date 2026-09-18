@@ -1,6 +1,8 @@
-# Stickbeats: EdgeTX sound themes
+# Stickbeats: EdgeTX voice packs and sound themes
 
-30 free sound themes for EdgeTX radios. Each one replaces the radio's beeps, warnings and callouts (boot, arm/disarm, low battery, telemetry lost, RF critical, timers, trims, flight modes…) with sounds composed for that theme.
+**Voice packs** in 16 languages, previewable phrase by phrase, plus premium ElevenLabs voices made for this project: Dutch (Flemish and standard), British, Australian and Scottish English. The voices live in the [edgetx-sdcard-sounds fork](https://github.com/HansF/edgetx-sdcard-sounds); `voices_build.py` turns that repo into the site's catalogue, previews, hosted zips and one crawlable page per voice (`site/v/<id>.html`). Official EdgeTX voices are previewed here and downloaded from the EdgeTX release. In CI the voice repo is fetched as a sparse partial clone (`voices_build.py --sparse-patterns`); locally, set `EDGETX_VOICES_SRC` or keep the fork next to this checkout.
+
+**Sound themes:** 30 free sound themes for EdgeTX radios. Each one replaces the radio's beeps, warnings and callouts (boot, arm/disarm, low battery, telemetry lost, RF critical, timers, trims, flight modes…) with sounds composed for that theme.
 
 **Site:** https://hansf.github.io/edgetx-sound-themes/ lets you listen to every sound, compare themes, build your own mix and download ready-to-copy SD card packs.
 
@@ -41,7 +43,7 @@ Needs Python 3.11+, [uv](https://docs.astral.sh/uv/), `ffmpeg`, `fluidsynth` and
 uv run pytest -q                 # every theme must pass the safety checks
 uv run build.py                  # all packs -> out/<theme>/SOUNDS/en + out/<theme>/midi
 uv run build.py cat-mode         # one theme
-uv run build.py --site           # + site/data, previews, zips; then serve site/
+uv run build.py --site           # + site/data, previews, zips, voice catalogue; then serve site/
 uv run build.py --private        # + personal themes from private_themes/ (gitignored) -> private/
 uv run build.py --private --masters ~/my-sounds   # ...with your own WAVs layered on top
 ```

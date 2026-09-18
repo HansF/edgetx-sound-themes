@@ -23,6 +23,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Fetch voice packs (sparse partial clone of the voice repo)
+        run: |
+          git clone --filter=blob:none --no-checkout --depth 1 https://github.com/HansF/edgetx-sdcard-sounds voices-src
+          cd voices-src
+          git sparse-checkout init --no-cone
+          python3 ../voices_build.py --sparse-patterns > .git/info/sparse-checkout
+          git checkout
+          echo "EDGETX_VOICES_SRC=$GITHUB_WORKSPACE/voices-src" >> "$GITHUB_ENV"
+          du -sh SOUNDS | tail -1
+
       - name: Install FluidSynth and FFmpeg
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends fluidsynth ffmpeg
 

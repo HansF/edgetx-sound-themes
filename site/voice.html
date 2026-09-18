@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Voice · Stickbeats</title>
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .boardhead { display: flex; align-items: center; justify-content: space-between; gap: 12px 20px; flex-wrap: wrap; margin: 34px 0 14px; }
+  .boardhead h2 { font-size: 24px; }
+  .count { font: 13px var(--mono); color: var(--muted); }
+  .official-note { background: var(--panel); outline: 1px solid var(--line); border-radius: 14px; padding: 18px; display: grid; gap: 10px; }
+  .official-note p { margin: 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="logo" href="index.html"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="2" y="7" width="28" height="22" rx="7" fill="currentColor"/><circle cx="10" cy="18" r="4.2" fill="var(--ground)"/><circle cx="22" cy="18" r="4.2" fill="var(--ground)"/><circle cx="10" cy="18" r="1.6" fill="var(--accent)"/><circle cx="22" cy="18" r="1.6" fill="currentColor"/><rect x="24" y="1" width="2.4" height="8" rx="1.2" fill="currentColor"/></svg>Stickbeats</a>
+    <nav class="nav" aria-label="Main"><a href="voices.html">Voices</a><a href="index.html#themes">Themes</a><a href="compare.html">Compare</a><a href="mix.html">Mix</a><a href="install.html">Install</a><a href="https://github.com/HansF/edgetx-sound-themes">GitHub</a></nav>
+  </header>
+
+  <section class="v-hero">
+    <div>
+      <p class="eyebrow"><a href="voices.html" style="text-decoration:none">Voice packs</a> · <span id="native"></span></p>
+      <h1 id="title">Loading…</h1>
+      <p class="lede" id="lede"></p>
+      <div class="vmeta" id="meta" style="margin-bottom:18px"></div>
+      <div class="actions" id="actions"></div>
+    </div>
+    <aside class="bundle" id="bundle" hidden>
+      <h2>Voice + sound theme, one zip</h2>
+      <p style="margin:0;color:var(--muted);font-size:14px">Keep this voice for numbers and callouts, and let a theme take over the 70 alert sounds: boot, arm, low battery, telemetry, timers. Built in your browser.</p>
+      <label>Theme<select id="theme"></select></label>
+      <div class="demo" id="demo"></div>
+      <div class="row"><button class="btn accent" id="make" type="button">Download bundle</button><span class="status" id="status"></span></div>
+    </aside>
+  </section>
+
+  <div class="boardhead">
+    <h2 id="board-title">Every phrase</h2>
+    <label class="search" id="searchbox"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" type="search" placeholder="Search phrases, e.g. batterij, volt, flight mode…" aria-label="Search phrases"><span class="count" id="count"></span></label>
+  </div>
+  <div class="official-note" id="official-note" hidden></div>
+  <div class="panel board" id="boardwrap"><table><tbody id="rows"></tbody></table></div>
+
+  <nav class="pager" id="pager" aria-label="Other voices"></nav>
+  <footer class="site"><p>Copy the zip's <code>SOUNDS</code> folder to the SD card root, then set the voice language on the radio. <a href="install.html#voices">Install guide</a>.</p></footer>
+</div>
+
+<script src="assets/vendor/jszip.min.js"></script>
+<script src="assets/app.js"></script>
+<script>
+SB.markNav();
+SB.nowbar();
+Promise.all([SB.voices(), SB.data()]).then(([V, D]) => {
+  const v = V.byId[window.SB_VOICE || SB.param("v")] || V.hosted[0] || V.voices[0];
+  const seo = document.getElementById("seo"); if (seo) seo.remove();
+  if (!v) { document.getElementById("title").textContent = "No voice packs built yet"; return; }
+  document.title = `${v.name} (${v.native}) · Stickbeats`;
+  document.getElementById("native").textContent = v.native;
+  document.getElementById("title").innerHTML = `<span class="flag" aria-hidden="true">${v.flag}</span>${SB.esc(v.name)}`;
+  document.getElementById("lede").textContent = (v.note ? v.note + " " : "") + `${SB.GENDER[v.gender] || ""} ${v.language} voice, ${v.engine}. ${v.files} files: numbers, units, alarms, flight modes and the Betaflight, iNav and Yaapu script phrases.`;
+  document.getElementById("meta").innerHTML = [v.hosted ? '<span class="badge hot">Premium · hosted here</span>' : '<span class="badge">Official EdgeTX pack</span>',
+    `<span class="badge">${SB.esc(v.code)}</span>`, `<span class="badge">SOUNDS/${v.lang}</span>`,
+    v.hosted && v.checked ? `<span class="badge ok" title="Each clip was transcribed back with speech-to-text and compared with its text">${Math.round(100 * v.verified / v.checked)}% verified by transcription</span>` : ""].join("");
+  document.getElementById("actions").innerHTML = v.hosted
+    ? `<a class="btn accent" href="${v.zip}" download>Download voice pack <small>${SB.size(v.zipSize)}</small></a><a class="btn ghost ext" href="${v.source}">Sources</a>`
+    : `<a class="btn accent ext" href="${v.zip}">Download from EdgeTX <small>${v.zipSize ? SB.size(v.zipSize) : ""}</small></a><a class="btn ghost ext" href="${V.release.url}">Release notes</a>`;
+
+  // ----- phrase board
+  const files = Object.keys(v.clips).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+  const section = (f) => f.startsWith("SCRIPTS/") ? "Lua script phrases · " + f.split("/")[1] : f.startsWith("SYSTEM/") ? (/^SYSTEM\/\d{4}$/.test(f) ? "Numbers" : /^SYSTEM\/(volt|amp|mamp|knot|mps|fps|kph|mph|meter|foot|celsius|fahr|percent|watt|mwatt|db|rpm|g[01]|degree|rad|ml|founce|mlpm|hertz|ms[01]|us[01]|hour|minute|second|km)/.test(f) ? "Units" : "System alerts") : "Callouts (switches, flight modes, scripts)";
+  const order = ["System alerts", "Callouts (switches, flight modes, scripts)", "Numbers", "Units"];
+  const groups = {};
+  files.forEach((f) => (groups[section(f)] = groups[section(f)] || []).push(f));
+  const names = Object.keys(groups).sort((a, b) => (order.indexOf(a) + 1 || 99) - (order.indexOf(b) + 1 || 99) || a.localeCompare(b));
+  const rows = document.getElementById("rows");
+  rows.innerHTML = names.map((g) => `<tr class="group"><th colspan="4">${SB.esc(g)}</th></tr>` + groups[g].map((f) => {
+    const txt = SB.phraseText(V, v, f), en = V.english[f] || "";
+    return `<tr data-s="${SB.esc((txt + " " + en + " " + f).toLowerCase())}">
+      <td style="width:46px"><button class="play" type="button" data-f="${f}" aria-label="Play ${SB.esc(txt)}">${SB.PLAY_SVG}</button></td>
+      <td class="txt">${SB.esc(txt)}</td>
+      <td class="en">${en && en.toLowerCase() !== txt.toLowerCase() ? SB.esc(en) : ""}</td>
+      <td class="num act">${(v.durs[f] || 0).toFixed(2)}s${v.hosted ? `<a class="tiny" href="${v.raw}${f}.wav" download="${f.split("/").pop()}.wav">wav</a>` : ""}</td>
+    </tr>`;
+  }).join("")).join("");
+  rows.addEventListener("click", (e) => { const b = e.target.closest("[data-f]"); if (b) SB.play(v.clips[b.dataset.f], { text: `${v.flag} ${v.name} · ${SB.phraseText(V, v, b.dataset.f)} · ${b.dataset.f}.wav` }, b); });
+  const count = document.getElementById("count");
+  const q = document.getElementById("q");
+  const filter = () => {
+    const s = q.value.trim().toLowerCase();
+    let n = 0;
+    rows.querySelectorAll("tr[data-s]").forEach((tr) => { const hit = !s || tr.dataset.s.includes(s); tr.hidden = !hit; if (hit) n++; });
+    rows.querySelectorAll("tr.group").forEach((g) => { let sib = g.nextElementSibling, any = false; while (sib && !sib.classList.contains("group")) { if (!sib.hidden) any = true; sib = sib.nextElementSibling; } g.hidden = !any; });
+    count.textContent = `${n} of ${files.length}`;
+  };
+  q.oninput = filter;
+  filter();
+  if (!v.hosted) {
+    document.getElementById("board-title").textContent = `${files.length} preview phrases`;
+    const note = document.getElementById("official-note");
+    note.hidden = false;
+    note.innerHTML = `<p><strong>This is an official EdgeTX pack.</strong> Only a preview set is hosted here; the full ${v.files}-file pack downloads from the <a href="${V.release.url}">EdgeTX ${V.release.tag} release</a>.</p>
+      <p style="color:var(--muted)">Want a sound theme on top of it? Install this pack first, then copy a <a href="index.html#themes">theme's</a> <code>SOUNDS/en</code> files into <code>SOUNDS/${v.lang}</code>. The <a href="mix.html">mix builder</a> can write its zip to any language folder.</p>`;
+  }
+
+  // ----- bundle builder (hosted voices only)
+  if (v.hosted && D.themes.length) {
+    const bundle = document.getElementById("bundle");
+    bundle.hidden = false;
+    const sel = document.getElementById("theme");
+    sel.innerHTML = `<option value="">No theme, voice only</option>` + D.categories.map((c) => {
+      const ts = D.themes.filter((t) => t.category === c.id);
+      return ts.length ? `<optgroup label="${SB.esc(c.name)}">${ts.map((t) => `<option value="${t.id}">${SB.esc(t.name)}</option>`).join("")}</optgroup>` : "";
+    }).join("");
+    const remembered = SB.param("theme"); if (remembered && D.byId[remembered]) sel.value = remembered;
+    const demo = document.getElementById("demo");
+    const paintDemo = () => {
+      const t = D.byId[sel.value];
+      const items = [["armed", "Arm"], ["lowbat", "Low battery"], ["SYSTEM/telemko", "Telemetry lost"], ["SYSTEM/hello", "Boot"]];
+      demo.innerHTML = items.map(([f, l]) => `<button class="phrase" type="button" data-demo="${f}">${SB.PLAY_SVG}<span>${l}${t ? "" : " (voice)"}</span></button>`).join("") +
+        `<button class="phrase" type="button" data-demo="say"><span>${SB.PLAY_SVG}</span><span>“12.6 volts”</span></button>`;
+      if (!window.SB_VOICE) history.replaceState(null, "", `?v=${v.id}${t ? "&theme=" + t.id : ""}`);
+    };
+    paintDemo();
+    sel.onchange = paintDemo;
+    demo.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-demo]"); if (!b) return;
+      const t = D.byId[sel.value];
+      if (b.dataset.demo === "say") {
+        const seq = ["SYSTEM/0012", "SYSTEM/0173", "SYSTEM/volt1"].filter((f) => v.clips[f]).map((f) => ({ hash: v.clips[f], el: b, info: { text: `${v.name} · ${SB.phraseText(V, v, f)}` } }));
+        return SB.playSeq(seq);
+      }
+      const f = b.dataset.demo;
+      if (t && t.clips[f]) SB.play(t.clips[f], { text: `${t.name} · ${D.eventBy[f].label} (theme)` }, b);
+      else SB.play(v.clips[f], { text: `${v.name} · ${SB.phraseText(V, v, f)}` }, b);
+    });
+    const status = document.getElementById("status");
+    document.getElementById("make").onclick = async () => {
+      const t = D.byId[sel.value];
+      try {
+        status.textContent = "Fetching voice pack…";
+        const r = await fetch(v.zip); if (!r.ok) throw new Error(`voice zip ${r.status}`);
+        const zip = await JSZip.loadAsync(await r.arrayBuffer());
+        let n = 0;
+        if (t) {
+          status.textContent = `Adding ${t.name}…`;
+          const evs = Object.keys(t.clips);
+          await Promise.all(evs.map(async (f) => {
+            const w = await fetch(`wav/${t.clips[f]}.wav`); if (!w.ok) throw new Error(`${f}.wav ${w.status}`);
+            zip.file(`SOUNDS/${v.lang}/${f}.wav`, await w.arrayBuffer()); n++;
+          }));
+        }
+        zip.file("README.txt", `${v.name} voice pack (${v.native})${t ? ` + ${t.name} sound theme` : ""}\n\nCopy the SOUNDS folder onto the root of your EdgeTX SD card and set\nRadio setup > Voice language to ${v.language}.\n${t ? `\n${n} alert files come from the ${t.name} theme; everything else is spoken by ${v.name}.\n` : ""}\nhttps://hansf.github.io/edgetx-sound-themes/voice.html?v=${v.id}${t ? "&theme=" + t.id : ""}\n`);
+        status.textContent = "Compressing…";
+        const blob = await zip.generateAsync({ type: "blob", compression: "DEFLATE", compressionOptions: { level: 6 } });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob); a.download = `edgetx-${v.id}${t ? "-" + t.id : ""}.zip`;
+        document.body.appendChild(a); a.click();
+        setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+        status.textContent = `Downloaded ${a.download} (${SB.size(blob.size)}).`;
+      } catch (e) { status.textContent = "Failed: " + e.message; }
+    };
+  }
+
+  // ----- pager
+  const i = V.voices.indexOf(v), n = V.voices.length;
+  const prev = V.voices[(i - 1 + n) % n], next = V.voices[(i + 1) % n];
+  const vhref = (x) => (window.SB_VOICE ? `v/${x.id}.html` : `voice.html?v=${x.id}`);
+  document.getElementById("pager").innerHTML = `<a href="${vhref(prev)}"><span>← Previous</span>${prev.flag} ${SB.esc(prev.name)} · ${SB.esc(prev.native)}</a><a href="${vhref(next)}" style="text-align:right"><span>Next →</span>${next.flag} ${SB.esc(next.name)} · ${SB.esc(next.native)}</a>`;
+});
+</script>
+</body>
+</html>

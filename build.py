@@ -58,6 +58,8 @@ def main():
     if a.site:
         from site_build import build_site
         build_site(ROOT, OUT, sorted(REGISTRY) if not a.themes else ids)
+        from voices_build import build_voices
+        build_voices(ROOT / "site")
         if a.private:
             print("NOTE: site/ now contains private themes. Preview locally only; CI builds the public site from git.")
     if a.private:

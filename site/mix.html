@@ -24,7 +24,7 @@
 <div class="wrap">
   <header class="top">
     <a class="logo" href="index.html"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="2" y="7" width="28" height="22" rx="7" fill="currentColor"/><circle cx="10" cy="18" r="4.2" fill="var(--ground)"/><circle cx="22" cy="18" r="4.2" fill="var(--ground)"/><circle cx="10" cy="18" r="1.6" fill="var(--accent)"/><circle cx="22" cy="18" r="1.6" fill="currentColor"/><rect x="24" y="1" width="2.4" height="8" rx="1.2" fill="currentColor"/></svg>Stickbeats</a>
-    <nav class="nav" aria-label="Main"><a href="index.html">Themes</a><a href="compare.html">Compare</a><a href="mix.html">Mix your own</a><a href="install.html">Install</a><a href="https://github.com/HansF/edgetx-sound-themes">GitHub</a></nav>
+    <nav class="nav" aria-label="Main"><a href="voices.html">Voices</a><a href="index.html#themes">Themes</a><a href="compare.html">Compare</a><a href="mix.html">Mix</a><a href="install.html">Install</a><a href="https://github.com/HansF/edgetx-sound-themes">GitHub</a></nav>
   </header>
 
   <p class="eyebrow">Mix your own</p>
@@ -33,6 +33,7 @@
 
   <div class="panel tools">
     <label for="base">Start from<select id="base"></select></label>
+    <label for="vbase">Voice pack<select id="vbase"><option value="">None, sounds only</option></select></label>
     <button class="btn ghost" id="fill" type="button">Use for every event</button>
     <button class="btn ghost" id="random" type="button">Surprise me</button>
     <div class="push">
@@ -43,15 +44,19 @@
   <div class="used" id="used"></div>
   <p id="status" aria-live="polite"></p>
   <div class="panel board"><table><tbody id="rows"></tbody></table></div>
-  <footer class="site"><p>The zip contains <code>SOUNDS/en/…</code> with all 70 files, exactly like the ready-made packs. <a href="install.html">Install guide</a>.</p></footer>
+  <footer class="site"><p>The zip contains <code>SOUNDS/en/…</code> with all 70 files, exactly like the ready-made packs. Pick a <a href="voices.html">voice pack</a> above and the zip becomes a complete language folder: the voice speaks numbers and callouts, your mix does the alerts. <a href="install.html">Install guide</a>.</p></footer>
 </div>
 <script src="assets/vendor/jszip.min.js"></script>
 <script src="assets/app.js"></script>
 <script>
 SB.markNav();
 SB.nowbar();
-SB.data().then((D) => {
+Promise.all([SB.data(), SB.voices()]).then(([D, V]) => {
   const files = D.groups.flatMap((g) => g.files);
+  const vbase = document.getElementById("vbase");
+  V.hosted.forEach((v) => vbase.appendChild(new Option(`${v.flag} ${v.name} · ${v.native} (${SB.size(v.zipSize)})`, v.id)));
+  if (SB.param("voice") && V.byId[SB.param("voice")]) vbase.value = SB.param("voice");
+  vbase.onchange = () => { const u = new URL(location.href); if (vbase.value) u.searchParams.set("voice", vbase.value); else u.searchParams.delete("voice"); history.replaceState(null, "", u); };
   const ids = D.themes.map((t) => t.id);
   const pick = {};
   // link format: #<theme index base36 per event, 2 chars each>
@@ -98,25 +103,32 @@ SB.data().then((D) => {
     catch (e) { status.textContent = "Copy this address: " + location.href; }
   };
   document.getElementById("download").onclick = async () => {
-    status.textContent = "Collecting 70 files…";
-    const zip = new JSZip();
-    const readme = "Stickbeats custom mix\n\n" + files.map((f) => `${f}.wav  <-  ${D.byId[pick[f]].name}`).join("\n") +
-      "\n\nCopy the SOUNDS folder onto the root of your EdgeTX SD card.\nSounds: CC0 1.0. https://hansf.github.io/edgetx-sound-themes/\nRebuild this mix: " + location.href + "\n";
+    const v = V.byId[vbase.value];
+    const lang = v ? v.lang : "en";
+    let zip = new JSZip();
+    const readme = "Stickbeats custom mix" + (v ? ` on the ${v.name} (${v.native}) voice pack` : "") + "\n\n" + files.map((f) => `${f}.wav  <-  ${D.byId[pick[f]].name}`).join("\n") +
+      `\n\nCopy the SOUNDS folder onto the root of your EdgeTX SD card${v ? ` and set the voice language to ${v.language}` : ""}.\nSounds: CC0 1.0. https://hansf.github.io/edgetx-sound-themes/\nRebuild this mix: ` + location.href + "\n";
     try {
+      if (v) {
+        status.textContent = `Fetching the ${v.name} voice pack (${SB.size(v.zipSize)})…`;
+        const r = await fetch(v.zip); if (!r.ok) throw new Error(`voice pack (${r.status})`);
+        zip = await JSZip.loadAsync(await r.arrayBuffer());
+      }
+      status.textContent = "Collecting 70 files…";
       await Promise.all(files.map(async (f) => {
         const r = await fetch(`wav/${D.byId[pick[f]].clips[f]}.wav`);
         if (!r.ok) throw new Error(`${f}.wav (${r.status})`);
-        zip.file(`SOUNDS/en/${f}.wav`, await r.arrayBuffer());
+        zip.file(`SOUNDS/${lang}/${f}.wav`, await r.arrayBuffer());
       }));
       zip.file("README.txt", readme);
       const blob = await zip.generateAsync({ type: "blob", compression: "DEFLATE" });
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
-      a.download = "stickbeats-mix.zip";
+      a.download = v ? `stickbeats-mix-${v.id}.zip` : "stickbeats-mix.zip";
       document.body.appendChild(a);
       a.click();
       setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
-      status.textContent = `Downloaded stickbeats-mix.zip (${SB.size(blob.size)}).`;
+      status.textContent = `Downloaded ${a.download} (${SB.size(blob.size)}).`;
     } catch (e) {
       status.textContent = "Download failed: could not fetch " + e.message + ". Check your connection and try again.";
     }

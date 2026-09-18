@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Voice packs · Stickbeats</title>
+<meta name="description" content="EdgeTX voice packs in 16 languages: listen before you download. Premium ElevenLabs voices in Dutch and English made here, plus every official EdgeTX pack.">
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  .v-intro { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: clamp(20px, 4vw, 56px); align-items: end; padding-block: clamp(18px, 4vw, 48px) 26px; }
+  @media (max-width: 880px) { .v-intro { grid-template-columns: 1fr; } }
+  .v-intro h1 { font-size: clamp(38px, 6vw, 76px); font-weight: 900; letter-spacing: -0.03em; }
+  .v-intro h1 em { font-style: normal; color: var(--accent); }
+  .v-intro .lede { color: var(--muted); font-size: clamp(16px, 1.5vw, 19px); max-width: 46ch; margin: 16px 0 0; }
+  .facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .fact { background: var(--panel); outline: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+  .fact b { display: block; font: 800 30px/1 var(--display); font-variation-settings: "wdth" 112; letter-spacing: -0.02em; }
+  .fact span { font-size: 13px; color: var(--muted); }
+  .toolbar { display: grid; gap: 12px; margin: 10px 0 20px; }
+  .toolbar .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .toolbar .row .lbl { font: 600 11px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
+  .howto { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 14px; margin-top: 12px; }
+  .howto div { background: var(--panel); outline: 1px solid var(--line); border-radius: 12px; padding: 16px; font-size: 15px; }
+  .howto b { display: block; margin-bottom: 4px; }
+</style>
+</head>
+<body>
+<a class="skip" href="#list">Skip to the voices</a>
+<div class="wrap">
+  <header class="top">
+    <a class="logo" href="index.html"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="2" y="7" width="28" height="22" rx="7" fill="currentColor"/><circle cx="10" cy="18" r="4.2" fill="var(--ground)"/><circle cx="22" cy="18" r="4.2" fill="var(--ground)"/><circle cx="10" cy="18" r="1.6" fill="var(--accent)"/><circle cx="22" cy="18" r="1.6" fill="currentColor"/><rect x="24" y="1" width="2.4" height="8" rx="1.2" fill="currentColor"/></svg>Stickbeats</a>
+    <nav class="nav" aria-label="Main"><a href="voices.html">Voices</a><a href="index.html#themes">Themes</a><a href="compare.html">Compare</a><a href="mix.html">Mix</a><a href="install.html">Install</a><a href="https://github.com/HansF/edgetx-sound-themes">GitHub</a></nav>
+  </header>
+
+  <section class="v-intro">
+    <div>
+      <p class="eyebrow">Voice packs</p>
+      <h1>Your radio, in <em>your language</em>.</h1>
+      <p class="lede">Every callout EdgeTX can say, spoken by a voice you actually want to hear. Listen first, download one folder, done. New here: Dutch, which EdgeTX never had, and a broadcast-grade English.</p>
+    </div>
+    <div class="facts">
+      <div class="fact"><b id="f-voices">–</b><span>voices</span></div>
+      <div class="fact"><b id="f-langs">–</b><span>languages</span></div>
+      <div class="fact"><b id="f-files">–</b><span>phrases per pack</span></div>
+    </div>
+  </section>
+
+  <div class="toolbar" id="toolbar">
+    <div class="row lang-chips" id="langs" role="group" aria-label="Language"></div>
+    <div class="row" id="kinds" role="group" aria-label="Kind"></div>
+  </div>
+
+  <div id="list">
+    <div class="subhead" id="h-hosted"><h2>Made here, premium</h2><p>Generated with ElevenLabs, every clip machine-checked by transcribing it back. Hosted on this site.</p></div>
+    <div class="vgrid" id="hosted"></div>
+    <div class="subhead" id="h-official"><h2>Official EdgeTX packs</h2><p>Azure neural voices from the <a id="rel-link" href="https://github.com/EdgeTX/edgetx-sdcard-sounds/releases">EdgeTX release</a>. Previews here, download from GitHub.</p></div>
+    <div class="vgrid" id="official"></div>
+  </div>
+
+  <section>
+    <div class="subhead"><h2>How a voice pack works</h2></div>
+    <div class="howto">
+      <div><b>One folder per language</b>The zip holds <code>SOUNDS/nl</code> (or <code>en</code>, <code>de</code>…). Copy <code>SOUNDS</code> to the root of the SD card; existing files are replaced.</div>
+      <div><b>Tell the radio</b>Radio setup → <em>Voice language</em>. Pick the language of the folder. Two voices of the same language share a folder, so install one at a time.</div>
+      <div><b>Mix with a theme</b>A voice speaks the numbers and callouts; a <a href="index.html#themes">sound theme</a> replaces the 70 alert files. Open a hosted voice to download the two combined in one zip.</div>
+    </div>
+  </section>
+
+  <footer class="site">
+    <p>Hosted voices are generated with ElevenLabs for this project and free to use on your radio. Official packs are © their EdgeTX contributors. Stickbeats is not affiliated with EdgeTX or ElevenLabs.</p>
+    <p><a href="install.html">How to install</a> · <a href="https://github.com/HansF/edgetx-sdcard-sounds">Voice sources on GitHub</a></p>
+  </footer>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+SB.markNav();
+SB.nowbar();
+SB.voices().then((V) => {
+  document.getElementById("f-voices").textContent = V.voices.length;
+  document.getElementById("f-langs").textContent = V.languages.length;
+  document.getElementById("f-files").textContent = (V.hosted[0] || V.voices[0]).files;
+  if (V.release) { const a = document.getElementById("rel-link"); a.href = V.release.url; a.textContent = `EdgeTX ${V.release.tag} release`; }
+
+  const CARD = ["SYSTEM/hello", "armed", "lowbat", "SYSTEM/telemko", "SYSTEM/0012", "SYSTEM/volt1", "rth"];
+  const card = (v) => {
+    const chips = CARD.filter((f) => v.clips[f]).map((f) =>
+      `<button class="phrase" type="button" data-v="${v.id}" data-f="${f}" title="${SB.esc(V.english[f] || f)}">${SB.PLAY_SVG}<span>${SB.esc(SB.phraseText(V, v, f))}</span></button>`).join("");
+    const dl = v.hosted
+      ? `<a class="btn small accent" href="${v.zip}" download>Download <small>${SB.size(v.zipSize)}</small></a>`
+      : (v.zip ? `<a class="btn small ghost ext" href="${v.zip}">EdgeTX zip ${v.zipSize ? `<small>${SB.size(v.zipSize)}</small>` : ""}</a>` : "");
+    return `<article class="vcard ${v.hosted ? "hosted" : ""}" data-id="${v.id}" data-lang="${v.lang}" data-kind="${v.hosted ? "hosted" : "official"}" data-g="${v.gender}">
+      <div class="vhead"><span class="flag" aria-hidden="true">${v.flag}</span>
+        <div class="who"><span class="native">${SB.esc(v.native)}</span><h3>${SB.esc(v.name)}<small>${SB.GENDER[v.gender] || ""}</small></h3></div>
+        ${v.hosted ? '<span class="badge hot">Premium</span>' : ""}
+      </div>
+      ${v.note ? `<p class="vnote">${SB.esc(v.note)}</p>` : ""}
+      <div class="vmeta"><span class="badge">${SB.esc(v.engine)}</span><span class="badge">${v.files} files</span>${v.hosted && v.checked ? `<span class="badge ok" title="${v.verified} of ${v.checked} clips transcribed back to the intended text">${Math.round(100 * v.verified / v.checked)}% verified</span>` : ""}</div>
+      <div class="phrases">${chips}</div>
+      <div class="vfoot"><a class="open" href="v/${v.id}.html">${v.hosted ? `All ${v.files} phrases →` : "Details →"}</a>${dl}</div>
+    </article>`;
+  };
+  document.getElementById("hosted").innerHTML = V.hosted.map(card).join("");
+  document.getElementById("official").innerHTML = V.voices.filter((v) => !v.hosted).map(card).join("");
+
+  document.getElementById("list").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-v][data-f]");
+    if (!b) return;
+    const v = V.byId[b.dataset.v];
+    SB.play(v.clips[b.dataset.f], { text: `${v.flag} ${v.name} · ${SB.phraseText(V, v, b.dataset.f)} · ${b.dataset.f}.wav` }, b);
+  });
+
+  // filters
+  const state = { lang: "", kind: "" };
+  const langs = document.getElementById("langs");
+  langs.innerHTML = `<span class="lbl">Language</span><button class="chip" data-lang="" aria-pressed="true">All <span class="n">${V.voices.length}</span></button>` +
+    V.languages.map((l) => `<button class="chip" data-lang="${l.lang}" aria-pressed="false"><span class="f">${l.flag}</span>${SB.esc(l.language)}<span class="n">${V.voices.filter((v) => v.lang === l.lang).length}</span></button>`).join("");
+  const kinds = document.getElementById("kinds");
+  kinds.innerHTML = `<span class="lbl">Show</span>` + [["", "Everything"], ["hosted", "Premium only"], ["m", "Male"], ["f", "Female"]].map(([k, l]) => `<button class="chip" data-kind="${k}" aria-pressed="${k === ""}">${l}</button>`).join("");
+  const apply = () => {
+    const wanted = (v) => (!state.lang || v.lang === state.lang) && (!state.kind || (state.kind === "hosted" ? v.hosted : v.gender === state.kind));
+    let nh = 0, no = 0;
+    document.querySelectorAll(".vcard").forEach((c) => { const v = V.byId[c.dataset.id]; const show = wanted(v); c.hidden = !show; if (show) v.hosted ? nh++ : no++; });
+    document.getElementById("h-hosted").hidden = !nh;
+    document.getElementById("h-official").hidden = !no;
+  };
+  langs.onclick = (e) => { const b = e.target.closest("[data-lang]"); if (!b) return; state.lang = b.dataset.lang; langs.querySelectorAll(".chip").forEach((x) => x.setAttribute("aria-pressed", x === b)); apply(); };
+  kinds.onclick = (e) => { const b = e.target.closest("[data-kind]"); if (!b) return; state.kind = b.dataset.kind; kinds.querySelectorAll(".chip").forEach((x) => x.setAttribute("aria-pressed", x === b)); apply(); };
+  const want = SB.param("lang"); if (want) { state.lang = want; langs.querySelectorAll(".chip").forEach((x) => x.setAttribute("aria-pressed", x.dataset.lang === want)); apply(); }
+});
+</script>
+</body>
+</html>

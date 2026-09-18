@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Install · Stickbeats</title>
+<meta name="description" content="How to install EdgeTX voice packs and sound themes: copy one SOUNDS folder to the SD card, pick the voice language, done.">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,7 +15,7 @@
 <div class="wrap">
   <header class="top">
     <a class="logo" href="index.html"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="2" y="7" width="28" height="22" rx="7" fill="currentColor"/><circle cx="10" cy="18" r="4.2" fill="var(--ground)"/><circle cx="22" cy="18" r="4.2" fill="var(--ground)"/><circle cx="10" cy="18" r="1.6" fill="var(--accent)"/><circle cx="22" cy="18" r="1.6" fill="currentColor"/><rect x="24" y="1" width="2.4" height="8" rx="1.2" fill="currentColor"/></svg>Stickbeats</a>
-    <nav class="nav" aria-label="Main"><a href="index.html">Themes</a><a href="compare.html">Compare</a><a href="mix.html">Mix your own</a><a href="install.html">Install</a><a href="https://github.com/HansF/edgetx-sound-themes">GitHub</a></nav>
+    <nav class="nav" aria-label="Main"><a href="voices.html">Voices</a><a href="index.html#themes">Themes</a><a href="compare.html">Compare</a><a href="mix.html">Mix</a><a href="install.html">Install</a><a href="https://github.com/HansF/edgetx-sound-themes">GitHub</a></nav>
   </header>
 
   <article class="prose">
@@ -55,8 +56,20 @@
     <h2>Using them in your model</h2>
     <p>In <em>Model → Special Functions</em>, add <em>Play Track</em> on a switch and pick the file: for example <code>armed</code> on SA↓ and <code>disarm</code> on SA↑. Flight-mode switches work well with <code>fm-1</code> to <code>fm-3</code>: you hear one, two or three rising notes.</p>
 
+    <h2 id="voices">Installing a voice pack</h2>
+    <p>A <a href="voices.html">voice pack</a> is the same idea, one level up: it is the whole <code>SOUNDS/&lt;language&gt;</code> folder, some 750 files, with every number, unit, alarm and callout EdgeTX can say.</p>
+    <ol class="steps">
+      <li><div><strong>Download and copy.</strong> Unzip, drag <code>SOUNDS</code> onto the card root, replace existing files. The Dutch packs land in <code>SOUNDS/nl</code>, English ones in <code>SOUNDS/en</code>.</div></li>
+      <li><div><strong>Select the language.</strong> On the radio: <em>Radio setup → Voice language</em>. EdgeTX 2.10 or newer lists Dutch; if yours does not, update the radio firmware first, or keep the files in <code>en</code>.</div></li>
+      <li><div><strong>One voice per language folder.</strong> Two voices of the same language overwrite each other. Installing Petra over Hans simply replaces the files.</div></li>
+    </ol>
+    <p>Hosted voices are 32 kHz mono, the highest rate EdgeTX plays. Each was generated with ElevenLabs, trimmed, peak-normalised, and then transcribed back with speech-to-text to catch mispronunciations. The phrase lists are in the <a href="https://github.com/HansF/edgetx-sdcard-sounds/tree/main/voices">voice repository</a>: fix a translation there and the next build regenerates only that file.</p>
+
+    <h2>Voice + theme</h2>
+    <p>Voice packs and sound themes stack. The theme replaces the 70 alert files, the voice does everything else. On any hosted voice's page, pick a theme and download both as one zip. The <a href="mix.html">mix builder</a> does the same for an event-by-event mix.</p>
+
     <h2>Other languages</h2>
-    <p>If your radio uses another voice language, rename the pack's <code>en</code> folder to your language code, such as <code>de</code>, <code>fr</code> or <code>nl</code>, before copying.</p>
+    <p>If your radio uses a voice language that has no theme folder yet, rename the theme pack's <code>en</code> folder to your language code, such as <code>de</code>, <code>fr</code> or <code>nl</code>, before copying.</p>
 
     <h2>Safety</h2>
     <p>Every theme has to pass the same checks before it's published:</p>

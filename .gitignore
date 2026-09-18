@@ -1,0 +1,8 @@
+__pycache__/
+.venv/
+.pytest_cache/
+out/
+private/
+site/data/
+site/audio/
+site/dl/

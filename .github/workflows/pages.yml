@@ -76,8 +76,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install FluidSynth
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends fluidsynth
+      - name: Install FluidSynth and FFmpeg
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends fluidsynth ffmpeg
 
       - name: Cache soundfont
         uses: actions/cache@v4

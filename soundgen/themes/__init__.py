@@ -22,6 +22,7 @@ CATEGORIES = [
     ("screen", "Screen & story"),
     ("sim", "Sim & tycoon"),
     ("meme", "Gen Z, Gen Alpha & weird"),
+    ("game", "Game homages"),
 ]
 
 

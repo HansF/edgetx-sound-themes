@@ -2,7 +2,7 @@
 
 **Voice packs** in 16 languages, previewable phrase by phrase, plus free CC0 voices made for this project: Dutch (Flemish and standard), British, Australian and Scottish English. The voices live in the [edgetx-sdcard-sounds fork](https://github.com/HansF/edgetx-sdcard-sounds); `voices_build.py` turns that repo into the site's catalogue, previews, hosted zips and one crawlable page per voice (`site/v/<id>.html`). Most official EdgeTX voices are hosted here too (so the mixer can bundle them), except GLaDOS and Joshua Bardwell's recording, which stay linked to the EdgeTX release. Voice packs are stored as 16 kHz FLAC (`site/dl/voice-<id>.flac.zip`) and converted to WAV in the browser by `site/assets/voicepack.js`, which keeps the site under GitHub Pages' 1 GB limit. In CI the voice repo is fetched as a sparse partial clone (`voices_build.py --sparse-patterns`); locally, set `EDGETX_VOICES_SRC` or keep the fork next to this checkout.
 
-**Sound themes:** 30 free sound themes for EdgeTX radios. Each one replaces the radio's beeps, warnings and callouts (boot, arm/disarm, low battery, telemetry lost, RF critical, timers, trims, flight modes…) with sounds composed for that theme.
+**Sound themes:** 47 free sound themes for EdgeTX radios. Each one replaces the radio's beeps, warnings and callouts (boot, arm/disarm, low battery, telemetry lost, RF critical, timers, trims, flight modes…) with sounds composed for that theme.
 
 **Site:** https://over9kfpv.github.io/stickbeats/ lets you listen to every sound, compare themes, build your own mix and download ready-to-copy SD card packs.
 
@@ -12,6 +12,7 @@
 | Old PCs & phones | PC Speaker, AdLib FM, Dial-Up '98, Polyphonic 2003 |
 | Screen & story | Wizard Academy, Chopper Command '84, Starship Bridge, Imperial Fleet, Neon Grid, Signal from Beyond, Haunted Manor, Medieval Bard |
 | Sim & tycoon | Life Sim, Theme Park '99, City Planner 2000 |
+| Game homages | Stealth Op, Meadow Hero, Ring Dash, Warp Pipe, Hellmetal, War Room, Safe Room, Agent 64, Hazard Suit, Bounty Hunter, Shmup Fury, Dojo Duel, Polygon Brawler, Tournament Gong, Rally Stage, Jungle Rumble, Nocturne Keep |
 | Gen Z, Gen Alpha & weird | Brainrot, Drift Phonk, Hyperpop, Kazoo Orchestra, Cat Mode, Rubber Duck Squad, NPC Mode, Elevator Bossa, Lo-fi Study |
 
 All music is original, except public-domain tunes (Korobeiniki, Tárrega's Gran Vals). The themes are in the spirit of their eras; they are not affiliated with any game, film or TV show.

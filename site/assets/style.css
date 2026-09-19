@@ -283,3 +283,6 @@ footer.site p { margin: 0; max-width: 62ch; }
 /* ---------- transmitter voice keys */
 .keys .sep { grid-column: 1 / -1; font: 600 10px var(--mono); letter-spacing: .2em; text-transform: uppercase; opacity: .5; margin-top: 4px; }
 .key.voice { color: #9fe3d2; }
+
+/* ---------- embedded request form */
+.gform { display: block; width: 100%; max-width: 640px; min-height: 900px; border: 0; margin-top: 16px; border-radius: 12px; background: #fff; }

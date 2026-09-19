@@ -251,7 +251,7 @@ def write_static_pages(site: Path, data):
     """
     tpl = (site / "voice.html").read_text()
     (site / "v").mkdir(exist_ok=True)
-    urls = [SITE_URL, SITE_URL + "voices.html", SITE_URL + "install.html", SITE_URL + "mix.html", SITE_URL + "compare.html"]
+    urls = [SITE_URL, SITE_URL + "voices.html", SITE_URL + "install.html", SITE_URL + "request.html", SITE_URL + "mix.html", SITE_URL + "compare.html"]
     import html as H
     for v in data["voices"]:
         g = {"m": "male", "f": "female"}.get(v["gender"], "synthetic")

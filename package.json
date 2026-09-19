@@ -1,0 +1,11 @@
+{
+  "name": "stickbeats-site-tests",
+  "private": true,
+  "scripts": {
+    "test": "node --test tests/js/*.test.cjs",
+    "test:browser": "node tests/js/mix-browser.cjs"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  }
+}

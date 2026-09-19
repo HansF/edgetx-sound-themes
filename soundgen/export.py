@@ -58,14 +58,25 @@ def build_theme(theme_cls, out_dir: Path):
     Returns {file: {"hash", "dur", "role"}}."""
     theme = theme_cls()
     S.reseed(sum(map(ord, theme.id)))
-    cache, index = {}, {}
+    cache, index, seen, used = {}, {}, set(), {}
     for file, role, args, _label in EVENTS:
         key = (role, args)
         if key not in cache:
-            score = theme.role(role, args)
+            cache[key] = theme.role(role, args)
+        base = cache[key]
+        k = used.get(key, 0)
+        while True:      # every file gets its own sound: bump the variant until it is new and not too quiet
+            score = base.variant(k)
             y = finalize(render(score), max_len(role, args))
-            cache[key] = (wav_bytes(y), midi_bytes(score), len(y) / OUT_SR)
-        wb, mb, dur = cache[key]
+            wb = wav_bytes(y)
+            k += 1
+            loud = np.sort(np.abs(y))[len(y) // 2:]
+            quiet = 20 * np.log10(np.sqrt(np.mean(loud ** 2)) + 1e-9) < RMS_DB - 6    # sparse, ringing variants
+            if wb not in seen and (not quiet or k == 1):
+                break
+        used[key] = k
+        seen.add(wb)
+        mb, dur = midi_bytes(score), len(y) / OUT_SR
         wp = out_dir / "SOUNDS" / "en" / f"{file}.wav"
         mp = out_dir / "midi" / f"{file}.mid"
         wp.parent.mkdir(parents=True, exist_ok=True)

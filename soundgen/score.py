@@ -22,6 +22,11 @@ DRUMS = {"kick": 36, "snare": 38, "clap": 39, "hat": 42, "ohat": 46, "crash": 49
          "shaker": 70, "tamb": 54}
 
 
+VARIANT_SEMIS = (0, 7, 5, 9, 2, 12)
+VARIANT_FX_SEMIS = (0, 1, -1, 7, 8, -2)   # procedural fx are fragile: only small or fifth shifts
+VARIANT_SPEEDS = (1.0, 0.8, 1.25)
+
+
 def pitch_of(p):
     if isinstance(p, (int, float)):
         return float(p)
@@ -122,6 +127,33 @@ class Score:
             for n in tr.notes:
                 n.t += dt
         return self
+
+    def variant(self, k):
+        """k-th alternative of this score (k=0 is the score itself): shifted up a pentatonic-ish
+        interval (down when the score is already very high) and re-timed, so events that share a role still sound different.
+        Drum tracks keep their pitches (they are note numbers, not notes)."""
+        if k == 0:
+            return self
+        semis = VARIANT_SEMIS[k % len(VARIANT_SEMIS)]
+        fx_semis = VARIANT_FX_SEMIS[k % len(VARIANT_FX_SEMIS)]
+        speed = VARIANT_SPEEDS[(k // len(VARIANT_SEMIS)) % len(VARIANT_SPEEDS)]
+        pitches = sorted(n.pitch for tr in self.tracks if not tr.inst.startswith("kit:") for n in tr.notes)
+        if pitches and pitches[len(pitches) // 2] > 84:     # already near the 16 kHz band limit
+            semis = -semis
+        out = Score(fx=list(self.fx), name=self.name)
+        for tr in self.tracks:
+            drums = tr.inst.startswith("kit:")
+            nt = Track(tr.inst, tr.vol, list(tr.fx))
+            for n in tr.notes:
+                d = dict(n.__dict__)
+                d["t"], d["dur"] = n.t / speed, n.dur / speed
+                if n.glide:
+                    d["glide"] = n.glide / speed
+                if not drums:
+                    d["pitch"] = min(127.0, n.pitch + (fx_semis if tr.inst.startswith("fx:") else semis))
+                nt.notes.append(Note(**d))
+            out.tracks.append(nt)
+        return out
 
     def merge(self, other, at=0.0):
         """Append another score's tracks, offset by `at` seconds."""

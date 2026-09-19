@@ -1,0 +1,33 @@
+.project-tools, .record-tools, .editor-actions, .editor-head { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.project-tools { margin-bottom: 10px; }
+.local-note, #saved-state, #recommendation, #selection-info { color: var(--muted); font-size: 14px; }
+.mix-controls { display: flex; gap: 7px; flex-wrap: wrap; align-items: center; justify-content: flex-end; }
+.mix-controls .btn { padding: 6px 10px; font-size: 13px; }
+.clip-state { display: block; font: 12px var(--mono); color: var(--muted); margin-top: 5px; }
+button:disabled { opacity: .5; cursor: not-allowed; }
+[hidden] { display: none !important; }
+#editor { background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 16px; width: min(720px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); padding: 22px; overflow-y: auto; }
+#editor::backdrop { background: rgb(0 0 0 / .6); }
+.editor-head { justify-content: space-between; }
+.editor-head h2 { margin: 0; font-size: 24px; }
+#editor-status { min-height: 1.5em; }
+#elapsed { font: 13px var(--mono); font-variant-numeric: tabular-nums; }
+.level-label { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+#waveform { display: block; width: 100%; height: 130px; background: var(--ground); border-radius: 8px; }
+.trim-inputs { display: flex; gap: 16px; margin: 16px 0; }
+.trim-inputs label { display: grid; gap: 6px; flex: 1; min-width: 0; font-size: 14px; }
+.trim-inputs input { width: 100%; box-sizing: border-box; padding: 8px; background: var(--ground); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; font: 16px var(--mono); }
+.range-label { display: block; font-size: 13px; }
+#editor input[type=range] { width: 100%; min-height: 32px; accent-color: var(--accent); }
+@media (max-width: 640px) {
+  #editor { padding: 14px; }
+  .board table { min-width: 0; }
+  .board td.file { display: none; }
+  .board td { padding: 10px 6px; }
+  .mix-controls { flex-direction: column; align-items: stretch; }
+  .mix-controls select { width: 100%; max-width: 150px; }
+  .board td.act { width: 44%; }
+  .board .lbl { font-size: 14px; }
+}
+
+.preview-controls { display: flex; flex-wrap: wrap; gap: 10px; position: sticky; top: 0; z-index: 1; padding: 10px 0; margin-bottom: 10px; background: var(--panel); border-bottom: 1px solid var(--line); }

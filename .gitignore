@@ -13,3 +13,5 @@ voices-src/
 site/sitemap.xml
 site/v/
 site/robots.txt
+
+node_modules/

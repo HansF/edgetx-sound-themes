@@ -50,6 +50,18 @@ jobs:
           curl -fsSL -o ~/.cache/edgetx-sound-themes/GeneralUser-GS.sf2 \
             "https://raw.githubusercontent.com/mrbumpy409/GeneralUser-GS/${SF2_COMMIT}/GeneralUser-GS.sf2"
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Test browser mix builder
+        run: |
+          npm ci
+          npm test
+          npx playwright install --with-deps chromium
+          npm run test:browser
+
       - uses: astral-sh/setup-uv@v6
 
       - name: Test every theme

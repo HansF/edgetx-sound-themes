@@ -15,7 +15,7 @@ import zipfile
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-from soundgen.roles import EVENTS, GROUPS
+from soundgen.roles import EVENTS, GROUPS, max_len
 from soundgen.themes import CATEGORIES, REGISTRY
 
 README = """{name} - EdgeTX sound theme
@@ -102,7 +102,7 @@ def build_site(root: Path, out: Path, ids):
                 p.unlink()
     data = {
         "generated": time.strftime("%Y-%m-%d"),
-        "events": [{"file": f, "role": r, "label": lbl} for f, r, _a, lbl in EVENTS],
+        "events": [{"file": f, "role": r, "label": lbl, "recommendedDuration": max_len(r, a)} for f, r, a, lbl in EVENTS],
         "groups": [{"name": g, "files": fs} for g, fs in GROUPS],
         "categories": [{"id": c, "name": n} for c, n in CATEGORIES],
         "themes": themes,

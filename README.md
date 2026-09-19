@@ -20,6 +20,39 @@ All music is original, except public-domain tunes (Korobeiniki, Tárrega's Gran 
 
 Unzip it and copy its `SOUNDS` folder onto the root of the radio's SD card. Only the 70 event files are replaced; spoken numbers and units stay. See [install](https://over9kfpv.github.io/stickbeats/install.html).
 
+## Record your own sounds
+
+The **Mix** page can record a personal replacement for each of the 70 sound events. Click
+**Record**, allow microphone access, and stop when finished. Smart trim suggests the sound's
+start and end while preserving pauses. Adjust the waveform selection, preview it, then choose
+**Use recording**. The original take stays available through **Edit**.
+
+Recording stops at 30 seconds; saved selections can be up to 10 seconds. The editor shows the
+shorter recommended duration for each event. ZIP exports convert recordings to 16 kHz mono
+16-bit WAV and combine them with your theme selections and optional voice pack.
+
+Recording needs HTTPS or localhost. Audio never leaves your device: IndexedDB stores the
+recordings and localStorage remembers project settings. The page restores your local project
+on your next visit. Download a ZIP as a backup; clearing site data removes saved recordings.
+Shared links contain theme selections only, with an explicit option to resume your local
+project or save the shared mix locally. The exported ZIP is an SD card pack, not an editable
+project backup.
+
+JavaScript tests (Node 20+):
+
+```sh
+npm ci
+npm test
+npx playwright install chromium
+npm run test:browser
+# Optional browser checks after installing the corresponding Playwright browser:
+BROWSER=firefox npm run test:browser
+BROWSER=webkit npm run test:browser
+```
+
+Browser tests use an isolated local server, fixture packs and synthetic microphone audio;
+no real microphone or generated sound catalogue is needed.
+
 ## How it works
 
 Every sound is a `Score` (`soundgen/score.py`): tracks of notes with bends, vibrato and drum hits. It is written out as a real MIDI file (shipped in each theme's MIDI zip) and rendered by `soundgen/render.py`:

@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
 <link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/mix.css">
 <style>
   .tools { display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: end; padding: 16px; margin-bottom: 18px; }
   .tools label { display: grid; gap: 4px; font: 600 11px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
@@ -29,7 +30,7 @@
 
   <p class="eyebrow">Mix your own</p>
   <h1 style="font-size:clamp(34px,5vw,56px);font-weight:900;margin:6px 0 10px">One pack, many themes</h1>
-  <p style="color:var(--muted);max-width:62ch;margin:0 0 22px">Boot like a 1989 handheld, arm with a vine boom, warn about the battery with a phonk cowbell. Pick a theme for each event and download your own SD card pack. Your picks live in the link, so you can share it.</p>
+  <p style="color:var(--muted);max-width:62ch;margin:0 0 22px">Boot like a 1989 handheld, arm with a vine boom, warn about the battery with a phonk cowbell. Record your own sounds, trim them, and pick a theme for the remaining events. Download everything as one SD card pack. Your recordings stay in this browser; shared links contain theme choices only.</p>
 
   <div class="panel tools">
     <label for="base">Start from<select id="base"></select></label>
@@ -41,99 +42,53 @@
       <button class="btn accent" id="download" type="button">Download my mix</button>
     </div>
   </div>
+  <div class="project-tools">
+    <span id="saved-state" role="status">Loading local project…</span>
+    <button class="btn ghost" id="resume" type="button" hidden>Resume local project</button>
+    <button class="btn ghost" id="keep" type="button" hidden>Save as local project</button>
+    <button class="btn ghost" id="retry-save" type="button" hidden>Retry saving</button>
+  </div>
+  <p class="local-note">Audio is recorded and processed on your device. Download your pack to keep a copy: clearing this site's browser data removes saved recordings.</p>
   <div class="used" id="used"></div>
   <p id="status" aria-live="polite"></p>
   <div class="panel board"><table><tbody id="rows"></tbody></table></div>
   <footer class="site"><p>The zip contains <code>SOUNDS/en/…</code> with all 70 files, exactly like the ready-made packs. Pick a <a href="voices.html">voice pack</a> above and the zip becomes a complete language folder: the voice speaks numbers and callouts, your mix does the alerts. <a href="install.html">Install guide</a>.</p></footer>
 </div>
+<dialog id="editor" aria-labelledby="editor-title">
+  <div class="editor-head"><h2 id="editor-title">Record a sound</h2><button type="button" class="btn ghost" id="close-editor" aria-label="Close recording editor">Close</button></div>
+  <p id="recommendation"></p>
+  <div class="record-tools">
+    <button type="button" class="btn accent" id="record">Start recording</button>
+    <button type="button" class="btn ghost" id="stop-record" disabled>Stop recording</button>
+    <output id="elapsed" aria-label="Recording duration">0.0s / 30s</output>
+    <label class="level-label">Microphone level <meter id="level" min="0" max="1" value="0"></meter></label>
+  </div>
+  <p id="editor-status" role="status"></p>
+  <div id="trim-tools" hidden>
+    <div class="preview-controls" role="group" aria-label="Listen to your recording">
+      <button class="btn accent" type="button" id="preview" title="Play the selected part of your recording"><span aria-hidden="true">▶</span> Play recording</button>
+      <button class="btn ghost" type="button" id="stop-preview">Stop playback</button>
+    </div>
+    <canvas id="waveform" role="img" aria-label="Recorded waveform. Use the start and end controls below to select audio."></canvas>
+    <div class="trim-inputs">
+      <label>Start (seconds)<input id="trim-start" type="number" min="0" step="0.01" inputmode="decimal"></label>
+      <label>End (seconds)<input id="trim-end" type="number" min="0" step="0.01" inputmode="decimal"></label>
+    </div>
+    <label class="range-label" for="start-range">Adjust start</label><input id="start-range" type="range" min="0" step="0.01">
+    <label class="range-label" for="end-range">Adjust end</label><input id="end-range" type="range" min="0" step="0.01">
+    <p id="selection-info" aria-live="polite"></p>
+    <div class="editor-actions">
+      <button class="btn ghost" type="button" id="auto-trim">Smart trim</button>
+      <button class="btn ghost" type="button" id="reset-trim">Reset to full take</button>
+      <button class="btn ghost" type="button" id="download-take">Download selection</button>
+      <button class="btn accent" type="button" id="save-clip">Use recording</button>
+    </div>
+  </div>
+</dialog>
 <script src="assets/vendor/jszip.min.js"></script>
 <script src="assets/app.js"></script>
-<script>
-SB.markNav();
-SB.nowbar();
-Promise.all([SB.data(), SB.voices()]).then(([D, V]) => {
-  const files = D.groups.flatMap((g) => g.files);
-  const vbase = document.getElementById("vbase");
-  V.hosted.forEach((v) => vbase.appendChild(new Option(`${v.flag} ${v.name} · ${v.native} (${SB.size(v.zipSize)})`, v.id)));
-  if (SB.param("voice") && V.byId[SB.param("voice")]) vbase.value = SB.param("voice");
-  vbase.onchange = () => { const u = new URL(location.href); if (vbase.value) u.searchParams.set("voice", vbase.value); else u.searchParams.delete("voice"); history.replaceState(null, "", u); };
-  const ids = D.themes.map((t) => t.id);
-  const pick = {};
-  // link format: #<theme index base36 per event, 2 chars each>
-  const encode = () => files.map((f) => ids.indexOf(pick[f]).toString(36).padStart(2, "0")).join("");
-  const decode = (s) => { if (s.length !== files.length * 2) return false; files.forEach((f, i) => { const t = ids[parseInt(s.substr(i * 2, 2), 36)]; if (t) pick[f] = t; }); return true; };
-  const base = document.getElementById("base");
-  D.themes.forEach((t) => base.appendChild(new Option(t.name, t.id)));
-  base.value = ids.includes("8bit-hero") ? "8bit-hero" : ids[0];
-  if (!decode(location.hash.slice(1))) files.forEach((f) => (pick[f] = base.value));
-
-  const options = D.categories.map((c) => {
-    const ts = D.themes.filter((t) => t.category === c.id);
-    return ts.length ? `<optgroup label="${SB.esc(c.name)}">${ts.map((t) => `<option value="${t.id}">${SB.esc(t.name)}</option>`).join("")}</optgroup>` : "";
-  }).join("");
-  const rows = document.getElementById("rows");
-  rows.innerHTML = D.groups.map((g) => `<tr class="group"><th colspan="4">${SB.esc(g.name)}</th></tr>` + g.files.map((f) => `
-    <tr>
-      <td style="width:46px"><button class="play" type="button" data-f="${f}" aria-label="Play ${SB.esc(D.eventBy[f].label)}">${SB.PLAY_SVG}</button></td>
-      <td><span class="lbl">${SB.esc(D.eventBy[f].label)}</span></td>
-      <td class="file">${f}.wav</td>
-      <td class="act"><label hidden for="s-${f}">Theme for ${SB.esc(D.eventBy[f].label)}</label><select id="s-${f}" data-f="${f}">${options}</select></td>
-    </tr>`).join("")).join("");
-  const sync = () => {
-    rows.querySelectorAll("select").forEach((s) => (s.value = pick[s.dataset.f]));
-    history.replaceState(null, "", "#" + encode());
-    const n = {};
-    files.forEach((f) => (n[pick[f]] = (n[pick[f]] || 0) + 1));
-    document.getElementById("used").innerHTML = "In this mix: " + Object.entries(n).sort((a, b) => b[1] - a[1])
-      .map(([id, c]) => `<span><i class="swatch" style="background:${D.byId[id].skin.accent}"></i>${SB.esc(D.byId[id].name)} × ${c}</span>`).join("");
-  };
-  sync();
-  rows.addEventListener("change", (e) => { const s = e.target.closest("select"); if (!s) return; pick[s.dataset.f] = s.value; sync(); play(s.dataset.f); });
-  const play = (f, el) => { const t = D.byId[pick[f]]; SB.play(t.clips[f], { text: `${t.name} · ${D.eventBy[f].label}` }, el || rows.querySelector(`.play[data-f="${CSS.escape(f)}"]`)); };
-  rows.addEventListener("click", (e) => { const b = e.target.closest(".play"); if (b) play(b.dataset.f, b); });
-  document.getElementById("fill").onclick = () => { files.forEach((f) => (pick[f] = base.value)); sync(); };
-  document.getElementById("random").onclick = () => {
-    // keep groups coherent-ish: one random theme per group, a few wildcards
-    D.groups.forEach((g) => { const t = ids[Math.floor(Math.random() * ids.length)]; g.files.forEach((f) => (pick[f] = Math.random() < 0.2 ? ids[Math.floor(Math.random() * ids.length)] : t)); });
-    sync();
-  };
-  const status = document.getElementById("status");
-  document.getElementById("share").onclick = async () => {
-    try { await navigator.clipboard.writeText(location.href); status.textContent = "Link copied."; }
-    catch (e) { status.textContent = "Copy this address: " + location.href; }
-  };
-  document.getElementById("download").onclick = async () => {
-    const v = V.byId[vbase.value];
-    const lang = v ? v.lang : "en";
-    let zip = new JSZip();
-    const readme = "Stickbeats custom mix" + (v ? ` on the ${v.name} (${v.native}) voice pack` : "") + "\n\n" + files.map((f) => `${f}.wav  <-  ${D.byId[pick[f]].name}`).join("\n") +
-      `\n\nCopy the SOUNDS folder onto the root of your EdgeTX SD card${v ? ` and set the voice language to ${v.language}` : ""}.\nSounds: CC0 1.0. https://over9kfpv.github.io/stickbeats/\nRebuild this mix: ` + location.href + "\n";
-    try {
-      if (v) {
-        status.textContent = `Fetching the ${v.name} voice pack (${SB.size(v.zipSize)})…`;
-        const r = await fetch(v.zip); if (!r.ok) throw new Error(`voice pack (${r.status})`);
-        zip = await JSZip.loadAsync(await r.arrayBuffer());
-      }
-      status.textContent = "Collecting 70 files…";
-      await Promise.all(files.map(async (f) => {
-        const r = await fetch(`wav/${D.byId[pick[f]].clips[f]}.wav`);
-        if (!r.ok) throw new Error(`${f}.wav (${r.status})`);
-        zip.file(`SOUNDS/${lang}/${f}.wav`, await r.arrayBuffer());
-      }));
-      zip.file("README.txt", readme);
-      const blob = await zip.generateAsync({ type: "blob", compression: "DEFLATE" });
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = v ? `stickbeats-mix-${v.id}.zip` : "stickbeats-mix.zip";
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
-      status.textContent = `Downloaded ${a.download} (${SB.size(blob.size)}).`;
-    } catch (e) {
-      status.textContent = "Download failed: could not fetch " + e.message + ". Check your connection and try again.";
-    }
-  };
-});
-</script>
+<script src="assets/mix-audio.js"></script>
+<script src="assets/mix-store.js"></script>
+<script src="assets/mix.js"></script>
 </body>
 </html>

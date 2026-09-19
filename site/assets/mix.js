@@ -17,10 +17,10 @@
   const recommended = file => D.eventBy[file].recommendedDuration || (/^(warn_a|warn_b|lost|found|signal_warn|signal_crit|lowbat|critbat|error)$/.test(D.eventBy[file].role) ? 1.2 : 2);
   D.themes.forEach(t => base.appendChild(new Option(t.name, t.id)));
   base.value = defaultId;
-  V.hosted.forEach(v => vbase.appendChild(new Option(`${v.flag} ${v.name} · ${v.native} (${SB.size(v.zipSize)})`, v.id)));
+  V.packed.forEach(v => vbase.appendChild(new Option(`${v.flag} ${v.name} · ${v.native} (${SB.size(v.packSize)})`, v.id)));
   files.forEach(f => { pick[f] = defaultId; });
   const voice = SB.param('voice');
-  if (V.hosted.some(v => v.id === voice)) vbase.value = voice;
+  if (V.packed.some(v => v.id === voice)) vbase.value = voice;
   const hash = location.hash.slice(1);
   if (hash) {
     const values = hash.match(/^[a-z0-9]+$/) && hash.length === files.length * 2
@@ -38,7 +38,7 @@
     if (!s || s.version !== 1) return false;
     pick = Object.fromEntries(files.map(f => [f, ids.includes(s.pick?.[f]) ? s.pick[f] : defaultId]));
     base.value = ids.includes(s.base) ? s.base : defaultId;
-    vbase.value = V.hosted.some(v => v.id === s.voice) ? s.voice : '';
+    vbase.value = V.packed.some(v => v.id === s.voice) ? s.voice : '';
     clips = new Map(files.filter(f => (s.customFiles || []).includes(f) && validClip(project.clips.get(f))).map(f => [f, project.clips.get(f)]));
     const missing = (s.customFiles || []).filter(f => files.includes(f) && !clips.has(f));
     if (missing.length) status.textContent = `${missing.length} saved recording(s) are missing or unreadable. Their theme sounds are used; record them again.`;
@@ -166,9 +166,7 @@
     try {
       let zip = new JSZip();
       if (v) {
-        status.textContent = `Fetching the ${v.name} voice pack…`;
-        const response = await fetch(v.zip); if (!response.ok) throw new Error(`Voice pack: HTTP ${response.status}`);
-        zip = await JSZip.loadAsync(await response.arrayBuffer());
+        zip = await SB.voiceZip(v, text => { status.textContent = text; });
         const readme = zip.file('README.txt');
         if (readme) zip.file('VOICE-README.txt', await readme.async('string'));
       }

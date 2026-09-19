@@ -6,6 +6,7 @@ const assert = require('node:assert/strict');
 const http = require('node:http');
 const fs = require('node:fs/promises');
 const path = require('node:path');
+const { execFileSync } = require('node:child_process');
 const { chromium, firefox, webkit } = require('playwright');
 const JSZip = require('../../site/assets/vendor/jszip.min.js');
 const A = require('../../site/assets/mix-audio.js');
@@ -14,16 +15,19 @@ const A = require('../../site/assets/mix-audio.js');
   const files = ['SYSTEM/hello', 'armed', ...Array.from({ length: 68 }, (_, i) => `event${i}`)];
   const themes = ['8bit-hero', 'cat-mode'].map((id, i) => ({ id, name: i ? 'Cat Mode' : '8-Bit Hero', category: 'test', clips: Object.fromEntries(files.map(f => [f, 'fixture'])) }));
   const catalogue = { themes, groups: [{ name: 'Events', files }], categories: [{ id: 'test', name: 'Test themes' }], events: files.map(file => ({ file, label: file, role: 'startup', recommendedDuration: 2 })) };
-  const voices = { voices: [{ id: 'test-voice', hosted: true, flag: '', name: 'Test Voice', native: 'Dutch', language: 'Dutch', lang: 'nl', zipSize: 100, zip: 'fixture-voice.zip' }] };
+  const voices = { voices: [{ id: 'test-voice', hosted: true, flag: '', name: 'Test Voice', native: 'Dutch', language: 'Dutch', lang: 'nl', packSize: 100, pack: 'fixture-voice.flac.zip' }] };
   const fixtureSamples = new Float32Array(A.RATE / 2).map((_, i) => .1 * Math.sin(i * .1));
   const wav = Buffer.from(await A.wav(fixtureSamples).arrayBuffer());
-  const voiceZip = await new JSZip().file('SOUNDS/nl/SYSTEM/0000.wav', wav).file('README.txt', 'Original voice attribution').generateAsync({ type: 'nodebuffer' });
+  // Voice packs ship as 16 kHz FLAC; the page must turn them back into WAV.
+  const pcm = wav.subarray(44);
+  const flac = execFileSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-f', 's16le', '-ar', '16000', '-ac', '1', '-i', 'pipe:0', '-f', 'flac', 'pipe:1'], { input: pcm, maxBuffer: 1e7 });
+  const voiceZip = await new JSZip().file('SOUNDS/nl/SYSTEM/0000.flac', flac).file('README.txt', 'Original voice attribution').generateAsync({ type: 'nodebuffer' });
   const root = path.resolve(__dirname, '../../site');
   const server = http.createServer(async (req, res) => {
     const url = new URL(req.url, 'http://localhost');
     if (url.pathname === '/data/themes.json' || url.pathname === '/data/voices.json') { res.setHeader('Content-Type', 'application/json'); res.end(JSON.stringify(url.pathname.includes('themes') ? catalogue : voices)); return; }
     if (url.pathname.startsWith('/wav/')) { res.end(wav); return; }
-    if (url.pathname === '/fixture-voice.zip') { res.end(voiceZip); return; }
+    if (url.pathname === '/fixture-voice.flac.zip') { res.end(voiceZip); return; }
     const file = path.resolve(root, '.' + url.pathname);
     if (!file.startsWith(root + path.sep)) { res.writeHead(403).end(); return; }
     try {
@@ -138,6 +142,8 @@ const A = require('../../site/assets/mix-audio.js');
       window.realGetUserMedia = navigator.mediaDevices.getUserMedia;
       navigator.mediaDevices.getUserMedia = () => new Promise(resolve => { window.finishPermission = resolve; });
     });
+    assert.equal(Object.keys(zip.files).filter(f => f.endsWith('.flac')).length, 0);
+    assert.deepEqual(new Uint8Array(await zip.file('SOUNDS/nl/SYSTEM/0000.wav').async('uint8array')), new Uint8Array(wav));   // FLAC round trip is lossless
     await page.locator('#record').click();
     await page.waitForFunction(() => !!window.finishPermission);
     await page.locator('#close-editor').click();

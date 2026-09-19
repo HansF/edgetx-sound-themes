@@ -76,7 +76,9 @@
   </footer>
 </div>
 
+<script src="assets/vendor/jszip.min.js"></script>
 <script src="assets/app.js"></script>
+<script src="assets/voicepack.js"></script>
 <script>
 SB.markNav();
 SB.nowbar();
@@ -90,8 +92,8 @@ SB.voices().then((V) => {
   const card = (v) => {
     const chips = CARD.filter((f) => v.clips[f]).map((f) =>
       `<button class="phrase" type="button" data-v="${v.id}" data-f="${f}" title="${SB.esc(V.english[f] || f)}">${SB.PLAY_SVG}<span>${SB.esc(SB.phraseText(V, v, f))}</span></button>`).join("");
-    const dl = v.hosted
-      ? `<a class="btn small accent" href="${v.zip}" download>Download <small>${SB.size(v.zipSize)}</small></a>`
+    const dl = v.pack
+      ? `<button class="btn small accent" type="button" data-dl="${v.id}">Download <small>${SB.size(v.packSize)}</small></button>`
       : (v.zip ? `<a class="btn small ghost ext" href="${v.zip}">EdgeTX zip ${v.zipSize ? `<small>${SB.size(v.zipSize)}</small>` : ""}</a>` : "");
     return `<article class="vcard ${v.hosted ? "hosted" : ""}" data-id="${v.id}" data-lang="${v.lang}" data-kind="${v.hosted ? "hosted" : "official"}" data-g="${v.gender}">
       <div class="vhead"><span class="flag" aria-hidden="true">${v.flag}</span>
@@ -105,6 +107,13 @@ SB.voices().then((V) => {
     </article>`;
   };
   document.getElementById("hosted").innerHTML = V.hosted.map(card).join("");
+  document.addEventListener("click", async (e) => {
+    const b = e.target.closest("button[data-dl]"); if (!b) return;
+    const label = b.innerHTML; b.disabled = true;
+    try { await SB.downloadVoice(V.byId[b.dataset.dl], (m) => { b.textContent = m.replace(/^Converting .*… /, ""); }); }
+    catch (err) { b.textContent = "Failed"; b.title = err.message; await new Promise((r) => setTimeout(r, 4000)); }
+    b.innerHTML = label; b.disabled = false;
+  });
   document.getElementById("official").innerHTML = V.voices.filter((v) => !v.hosted).map(card).join("");
 
   document.getElementById("list").addEventListener("click", (e) => {

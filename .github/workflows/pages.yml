@@ -67,6 +67,13 @@ jobs:
       - name: Test every theme
         run: uv run pytest -q
 
+      - name: Cache FLAC conversions (keyed by content hash, so any old cache is safe to reuse)
+        uses: actions/cache@v4
+        with:
+          path: .flac-cache
+          key: flac-${{ github.run_id }}
+          restore-keys: flac-
+
       - name: Build packs and site
         run: uv run build.py --site
 

@@ -8,8 +8,11 @@ site/data/voices.json      catalogue: languages, voices, preview phrases, texts
 site/audio/<hash>.mp3      preview clips (all voices) and every phrase (hosted voices)
 (single-file downloads link to the raw files in the voice repository; the bundle builder
  works from the zip, so nothing is stored twice)
-site/dl/voice-<id>.zip     hosted voices: SOUNDS/<lang>/... ready for the SD card
+site/dl/voice-<id>.flac.zip  voice packs we host: SOUNDS/<lang>/*.flac (16 kHz, lossless, stored).
+                            The browser decodes them back to WAV when you download (assets/voicepack.js),
+                            which keeps ~40 voices under the Pages size limit.
 """
+import wave
 import csv
 import hashlib
 import json
@@ -17,6 +20,7 @@ import os
 import shutil
 import subprocess
 import sys
+import threading
 import time
 import urllib.request
 import zipfile
@@ -84,6 +88,29 @@ VOICES = {
     "hk":            ("zh-HK", "Cantonese",          "廣東話",               "🇭🇰", "HiuGaai",   "f", "Azure neural", "zh-HK", False, ""),
 }
 
+# Official packs we redistribute (as FLAC) so the mixer can bundle them. GLaDOS is a game character
+# and Joshua Bardwell's is a real person's recording: both stay linked to the EdgeTX release.
+NOT_PACKED = {"en_gb-glados", "en_us-joshua-bardwell"}
+
+
+def packed(d):
+    return VOICES[d][8] or d not in NOT_PACKED
+
+
+README_OFFICIAL = """{name} - EdgeTX voice pack ({native})
+Official EdgeTX voice pack ({engine}), from https://github.com/EdgeTX/edgetx-sdcard-sounds (GPL-2.0).
+Repackaged by Stickbeats; audio is unchanged apart from 16 kHz resampling where the original was higher.
+
+INSTALL
+1. Connect the radio in USB storage mode (or take the SD card out).
+2. Copy the SOUNDS folder from this zip onto the root of the SD card.
+3. On the radio: Radio setup -> Voice language -> {language}. Power-cycle.
+
+{n} files.
+
+Want game-style alert sounds on top of this voice? https://over9kfpv.github.io/stickbeats/
+"""
+
 README = """{name} - EdgeTX voice pack ({native})
 Generated with ElevenLabs by Stickbeats. {note}
 
@@ -92,7 +119,7 @@ INSTALL
 2. Copy the SOUNDS folder from this zip onto the root of the SD card.
 3. On the radio: Radio setup -> Voice language -> {language}. Power-cycle.
 
-{n} files, 32 kHz mono 16-bit WAV. Numbers, units, alarms and every callout EdgeTX
+{n} files, 16 kHz mono 16-bit WAV. Numbers, units, alarms and every callout EdgeTX
 knows, plus the Betaflight, iNav and Yaapu script phrases in SOUNDS/{lang}/SCRIPTS.
 
 Want game-style alert sounds on top of this voice? https://over9kfpv.github.io/stickbeats/
@@ -103,8 +130,8 @@ def sparse_patterns():
     pats = ["/voices/*.csv", "/sounds.json", "/SOUNDS/*/.elevenlabs.json"]
     for f in PREVIEWS:
         pats.append(f"/SOUNDS/*/{f}.wav")
-    for d, v in VOICES.items():
-        if v[8]:
+    for d in VOICES:
+        if packed(d):
             pats.append(f"/SOUNDS/{d}/**")
     return pats
 
@@ -118,6 +145,58 @@ def _mp3(args):
     if not mp3.exists():
         subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-i", str(wav),
                         "-ac", "1", "-ar", "32000", "-b:a", "48k", str(mp3)], check=True)
+
+
+FLAC_CACHE = ROOT / ".flac-cache"
+PACK_RATE = 16000
+
+
+def _rate(wav: Path) -> int:
+    try:
+        with wave.open(str(wav)) as w:
+            return w.getframerate()
+    except (wave.Error, EOFError):      # a few official "wav" files are MP3 in disguise
+        out = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "a:0", "-show_entries",
+                              "stream=sample_rate", "-of", "csv=p=0", str(wav)], capture_output=True, text=True).stdout
+        return int(out.strip() or PACK_RATE)
+
+
+def _strip_flac(data: bytes) -> bytes:
+    """Keep only STREAMINFO: ffmpeg adds 8 KB of padding and a comment block, a quarter of a short clip."""
+    i, blocks = 4, []
+    while True:
+        h = data[i]
+        n = int.from_bytes(data[i + 1:i + 4], "big")
+        blocks.append((h & 127, data[i + 4:i + 4 + n]))
+        i += 4 + n
+        if h & 128:
+            break
+    info = next(b for t, b in blocks if t == 0)
+    return data[:4] + bytes([0x80]) + len(info).to_bytes(3, "big") + info + data[i:]
+
+
+def _flac(wav: Path) -> Path:
+    """Lossless 16-bit FLAC, resampled to 16 kHz when the source is higher (like the official packs)."""
+    out = FLAC_CACHE / f"{_hash(wav)}.flac"
+    if not out.exists():
+        FLAC_CACHE.mkdir(exist_ok=True)
+        tmp = out.with_name(f"{out.stem}.{threading.get_ident()}.tmp")     # identical clips race otherwise
+        ar = ["-ar", str(PACK_RATE)] if _rate(wav) > PACK_RATE else []
+        subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-i", str(wav), *ar,
+                        "-sample_fmt", "s16", "-compression_level", "8", "-f", "flac", str(tmp)], check=True)
+        tmp.write_bytes(_strip_flac(tmp.read_bytes()))
+        tmp.replace(out)
+    return out
+
+
+def _zip_stored(path, files):
+    tmp = path.with_suffix(".tmp")
+    with zipfile.ZipFile(tmp, "w", zipfile.ZIP_STORED) as z:     # FLAC does not compress further
+        for arc, src in files:
+            zi = zipfile.ZipInfo(arc, date_time=(2026, 1, 1, 0, 0, 0))
+            zi.compress_type = zipfile.ZIP_STORED
+            z.writestr(zi, src if isinstance(src, (bytes, str)) else src.read_bytes())
+    tmp.replace(path)
 
 
 def _dur(wav: Path) -> float:
@@ -176,11 +255,14 @@ def build_voices(site: Path):
         return None
     for sub in ("data", "audio", "wav", "dl"):
         (site / sub).mkdir(parents=True, exist_ok=True)
+    for old in (site / "dl").glob("voice-*.zip"):      # superseded by voice-<id>.flac.zip
+        if not old.name.endswith(".flac.zip"):
+            old.unlink()
     tag, assets = release_assets()
     ver = tag.lstrip("v")
     en_main, en_scripts = read_csv("en-GB"), read_csv("en-GB", True)
     english = {**en_main, **en_scripts}
-    jobs, voices = {}, []
+    jobs, voices, packs = {}, [], []
     for d, (code, language, native, flag, name, gender, engine, stem, hosted, note) in VOICES.items():
         root = sounds / d
         if not root.is_dir():
@@ -203,21 +285,28 @@ def build_voices(site: Path):
                      texts={rel: texts.get(rel, ("", ""))[0] for rel in clips},
                      previews=[f for f in PREVIEWS if f in clips])
         if hosted:
-            lang = d[:2]
             manifest = root / ".elevenlabs.json"
             checks = json.loads(manifest.read_text()) if manifest.exists() else {}
-            readme = README.format(name=name, native=native, note=note, language=language, n=len(wavs), lang=lang)
-            _zip(site / "dl" / f"voice-{d}.zip",
-                 [(f"SOUNDS/{lang}/{rel}.wav", p) for p, rel in zip(wavs, rels)] + [("README.txt", readme)])
-            entry.update(zip=f"dl/voice-{d}.zip", zipSize=(site / "dl" / f"voice-{d}.zip").stat().st_size,
-                         verified=sum(1 for v in checks.values() if v.get("stt_ok")), checked=len(checks),
+            entry.update(verified=sum(1 for v in checks.values() if v.get("stt_ok")), checked=len(checks),
                          source=f"https://github.com/{FORK}/tree/main/SOUNDS/{d}",
                          raw=f"https://raw.githubusercontent.com/{FORK}/main/SOUNDS/{d}/")
         else:
             url, size = assets.get(f"edgetx-sdcard-sounds-{d}-{ver}.zip", ("", 0))
             entry.update(zip=url, zipSize=size, source=f"https://github.com/{RELEASE_REPO}")
+        if packed(d):
+            packs.append((d, entry, root, wavs, rels, d[:2]))
         voices.append(entry)
     with ThreadPoolExecutor(8) as ex:
+        for d, entry, root, wavs, rels, lang in packs:
+            flacs = list(ex.map(_flac, wavs))
+            tpl = README if entry["hosted"] else README_OFFICIAL
+            readme = tpl.format(name=entry["name"], native=entry["native"], note=entry["note"], engine=entry["engine"],
+                                language=entry["language"], n=len(wavs), lang=lang)
+            path = site / "dl" / f"voice-{d}.flac.zip"
+            _zip_stored(path, [(f"SOUNDS/{lang}/{rel}.flac", f) for f, rel in zip(flacs, rels)] + [("README.txt", readme)])
+            entry.update(pack=f"dl/voice-{d}.flac.zip", packSize=path.stat().st_size)
+            if entry["hosted"]:
+                entry.update(zip=entry["pack"], zipSize=entry["packSize"])
         list(ex.map(_mp3, jobs.values()))
         durations = dict(zip(jobs, ex.map(lambda j: round(_dur(j[0]), 2), jobs.values())))
     for v in voices:
@@ -239,8 +328,9 @@ def build_voices(site: Path):
     (site / "data" / "voices.json").write_text(json.dumps(data, separators=(",", ":"), ensure_ascii=False))
     write_static_pages(site, data)
     hosted = [v for v in voices if v["hosted"]]
-    print(f"voices: {len(voices)} voices in {len(languages)} languages, {len(hosted)} hosted "
-          f"({sum(v['zipSize'] for v in hosted) / 1e6:.0f} MB of zips), {len(jobs)} clips, {time.time() - t0:.1f}s")
+    hosted_packs = [v for v in voices if v.get("pack")]
+    print(f"voices: {len(voices)} voices in {len(languages)} languages, {len(hosted)} premium, "
+          f"{len(hosted_packs)} hosted ({sum(v['packSize'] for v in hosted_packs) / 1e6:.0f} MB of FLAC zips), {len(jobs)} clips, {time.time() - t0:.1f}s")
     return data
 
 
@@ -267,7 +357,7 @@ def write_static_pages(site: Path, data):
         phrases = sorted(v["texts"].items())
         lines = "".join(f"<li>{H.escape(t or data['english'].get(f, f))}</li>" for f, t in phrases if (t or data["english"].get(f)))
         seo = (f'<div id="seo"><h1>{v["flag"]} {H.escape(v["name"])}: {H.escape(v["native"])} voice pack for EdgeTX</h1>'
-               f'<p>{H.escape(desc)}</p><p>{kind}. {v["files"]} WAV files, 32 kHz mono.</p>'
+               f'<p>{H.escape(desc)}</p><p>{kind}. {v["files"]} files.</p>'
                f'<h2>{len(phrases)} phrases</h2><ul>{lines}</ul></div>')
         page = tpl.replace("<title>Voice · Stickbeats</title>",
                            f'<title>{H.escape(title)}</title>\n<meta name="description" content="{H.escape(desc)}">'

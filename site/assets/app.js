@@ -17,8 +17,9 @@
   SB.voices = () => (voicesP = voicesP || fetch("data/voices.json").then((r) => (r.ok ? r.json() : { voices: [], languages: [], previews: [], english: {} })).then((d) => {
     d.byId = Object.fromEntries(d.voices.map((v) => [v.id, v]));
     d.hosted = d.voices.filter((v) => v.hosted);
+    d.packed = d.voices.filter((v) => v.pack);   // voices we serve as FLAC packs (premium + hosted official)
     return d;
-  }).catch(() => ({ voices: [], languages: [], previews: [], english: {}, byId: {}, hosted: [] })));
+  }).catch(() => ({ voices: [], languages: [], previews: [], english: {}, byId: {}, hosted: [], packed: [] })));
   SB.param = (k) => new URLSearchParams(location.search).get(k);
   SB.GENDER = { m: "male", f: "female", x: "synthetic" };
   /** the name a phrase file shows: the voice's own text, else the English source, else the file */

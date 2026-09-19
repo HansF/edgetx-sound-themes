@@ -90,7 +90,7 @@ INSTALL
 {n} files, 32 kHz mono 16-bit WAV. Numbers, units, alarms and every callout EdgeTX
 knows, plus the Betaflight, iNav and Yaapu script phrases in SOUNDS/{lang}/SCRIPTS.
 
-Want game-style alert sounds on top of this voice? https://hansf.github.io/edgetx-sound-themes/
+Want game-style alert sounds on top of this voice? https://over9kfpv.github.io/stickbeats/
 """
 
 
@@ -239,7 +239,7 @@ def build_voices(site: Path):
     return data
 
 
-SITE_URL = "https://hansf.github.io/edgetx-sound-themes/"
+SITE_URL = "https://over9kfpv.github.io/stickbeats/"
 
 
 def write_static_pages(site: Path, data):

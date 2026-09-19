@@ -24,7 +24,7 @@
 <div class="wrap">
   <header class="top">
     <a class="logo" href="index.html"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="2" y="7" width="28" height="22" rx="7" fill="currentColor"/><circle cx="10" cy="18" r="4.2" fill="var(--ground)"/><circle cx="22" cy="18" r="4.2" fill="var(--ground)"/><circle cx="10" cy="18" r="1.6" fill="var(--accent)"/><circle cx="22" cy="18" r="1.6" fill="currentColor"/><rect x="24" y="1" width="2.4" height="8" rx="1.2" fill="currentColor"/></svg>Stickbeats</a>
-    <nav class="nav" aria-label="Main"><a href="voices.html">Voices</a><a href="index.html#themes">Themes</a><a href="compare.html">Compare</a><a href="mix.html">Mix</a><a href="install.html">Install</a><a href="https://github.com/HansF/edgetx-sound-themes">GitHub</a></nav>
+    <nav class="nav" aria-label="Main"><a href="voices.html">Voices</a><a href="index.html#themes">Themes</a><a href="compare.html">Compare</a><a href="mix.html">Mix</a><a href="install.html">Install</a><a href="https://github.com/Over9kfpv/stickbeats">GitHub</a></nav>
   </header>
 
   <p class="eyebrow">Mix your own</p>
@@ -107,7 +107,7 @@ Promise.all([SB.data(), SB.voices()]).then(([D, V]) => {
     const lang = v ? v.lang : "en";
     let zip = new JSZip();
     const readme = "Stickbeats custom mix" + (v ? ` on the ${v.name} (${v.native}) voice pack` : "") + "\n\n" + files.map((f) => `${f}.wav  <-  ${D.byId[pick[f]].name}`).join("\n") +
-      `\n\nCopy the SOUNDS folder onto the root of your EdgeTX SD card${v ? ` and set the voice language to ${v.language}` : ""}.\nSounds: CC0 1.0. https://hansf.github.io/edgetx-sound-themes/\nRebuild this mix: ` + location.href + "\n";
+      `\n\nCopy the SOUNDS folder onto the root of your EdgeTX SD card${v ? ` and set the voice language to ${v.language}` : ""}.\nSounds: CC0 1.0. https://over9kfpv.github.io/stickbeats/\nRebuild this mix: ` + location.href + "\n";
     try {
       if (v) {
         status.textContent = `Fetching the ${v.name} voice pack (${SB.size(v.zipSize)})…`;

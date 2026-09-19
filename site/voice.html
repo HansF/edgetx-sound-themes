@@ -22,7 +22,7 @@
 <div class="wrap">
   <header class="top">
     <a class="logo" href="index.html"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="2" y="7" width="28" height="22" rx="7" fill="currentColor"/><circle cx="10" cy="18" r="4.2" fill="var(--ground)"/><circle cx="22" cy="18" r="4.2" fill="var(--ground)"/><circle cx="10" cy="18" r="1.6" fill="var(--accent)"/><circle cx="22" cy="18" r="1.6" fill="currentColor"/><rect x="24" y="1" width="2.4" height="8" rx="1.2" fill="currentColor"/></svg>Stickbeats</a>
-    <nav class="nav" aria-label="Main"><a href="voices.html">Voices</a><a href="index.html#themes">Themes</a><a href="compare.html">Compare</a><a href="mix.html">Mix</a><a href="install.html">Install</a><a href="request.html">Request</a><a href="https://github.com/Over9kfpv/stickbeats">GitHub</a></nav>
+    <nav class="nav" aria-label="Main"><a href="index.html#themes">Fun sound themes</a><a href="voices.html">Languages &amp; voices</a><a href="compare.html">Compare themes</a><a href="mix.html">Mix sounds</a><a href="install.html">Install</a><a href="request.html">Request</a><a href="https://github.com/Over9kfpv/stickbeats">GitHub</a></nav>
   </header>
 
   <section class="v-hero">
@@ -33,13 +33,13 @@
       <div class="vmeta" id="meta" style="margin-bottom:18px"></div>
       <div class="actions" id="actions"></div>
     </div>
-    <aside class="bundle" id="bundle" hidden>
-      <h2>Voice + sound theme, one zip</h2>
+    <details class="bundle" id="bundle" hidden>
+      <summary>Optional: add a fun sound theme</summary>
       <p style="margin:0;color:var(--muted);font-size:14px">Keep this voice for numbers and callouts, and let a theme take over the 70 alert sounds: boot, arm, low battery, telemetry, timers. Built in your browser.</p>
       <label>Theme<select id="theme"></select></label>
       <div class="demo" id="demo"></div>
       <div class="row"><button class="btn accent" id="make" type="button">Download bundle</button><span class="status" id="status"></span></div>
-    </aside>
+    </details>
   </section>
 
   <div class="boardhead">
@@ -50,7 +50,7 @@
   <div class="panel board" id="boardwrap"><table><tbody id="rows"></tbody></table></div>
 
   <nav class="pager" id="pager" aria-label="Other voices"></nav>
-  <footer class="site"><p>Copy the zip's <code>SOUNDS</code> folder to the SD card root, then set the voice language on the radio. <a href="install.html#voices">Install guide</a>.</p></footer>
+  <footer class="site"><p>Free downloads · Open source. Stickbeats original themes and voices: CC0. Code: MIT. Third-party voice packs retain their original licenses.</p><p>Copy the zip's <code>SOUNDS</code> folder to the SD card root, then set the voice language on the radio. <a href="install.html#voices">Install guide</a>.</p></footer>
 </div>
 
 <script src="assets/vendor/jszip.min.js"></script>
@@ -59,7 +59,7 @@
 <script>
 SB.markNav();
 SB.nowbar();
-Promise.all([SB.voices(), SB.data()]).then(([V, D]) => {
+Promise.all([SB.voices(), SB.data().catch(() => ({ themes: [] }))]).then(([V, D]) => {
   const v = V.byId[window.SB_VOICE || SB.param("v")] || V.hosted[0] || V.voices[0];
   const seo = document.getElementById("seo"); if (seo) seo.remove();
   if (!v) { document.getElementById("title").textContent = "No voice packs built yet"; return; }
@@ -67,11 +67,11 @@ Promise.all([SB.voices(), SB.data()]).then(([V, D]) => {
   document.getElementById("native").textContent = v.native;
   document.getElementById("title").innerHTML = `<span class="flag" aria-hidden="true">${v.flag}</span>${SB.esc(v.name)}`;
   document.getElementById("lede").textContent = (v.note ? v.note + " " : "") + `${SB.GENDER[v.gender] || ""} ${v.language} voice, ${v.engine}. ${v.files} files: numbers, units, alarms, flight modes and the Betaflight, iNav and Yaapu script phrases.`;
-  document.getElementById("meta").innerHTML = [v.hosted ? '<span class="badge hot">Premium · hosted here</span>' : '<span class="badge">Official EdgeTX pack</span>',
+  document.getElementById("meta").innerHTML = [v.hosted ? '<span class="badge hot">Free · CC0 · Made by Stickbeats</span>' : '<span class="badge">Free · Original EdgeTX license</span>',
     `<span class="badge">${SB.esc(v.code)}</span>`, `<span class="badge">SOUNDS/${v.lang}</span>`,
     v.hosted && v.checked ? `<span class="badge ok" title="Each clip was transcribed back with speech-to-text and compared with its text">${Math.round(100 * v.verified / v.checked)}% verified by transcription</span>` : ""].join("");
   document.getElementById("actions").innerHTML = v.pack
-    ? `<button class="btn accent" id="dl-voice" type="button">Download voice pack <small>${SB.size(v.packSize)}</small></button><a class="btn ghost ext" href="${v.source}">Sources</a>`
+    ? `<button class="btn accent" id="dl-voice" type="button">Download voice pack <small>${SB.size(v.packSize)}</small></button><a class="btn ghost ext" href="${v.source}">Sources &amp; license</a>`
     : `<a class="btn accent ext" href="${v.zip}">Download from EdgeTX <small>${v.zipSize ? SB.size(v.zipSize) : ""}</small></a><a class="btn ghost ext" href="${V.release.url}">Release notes</a>`;
   const dlv = document.getElementById("dl-voice");
   if (dlv) dlv.onclick = async () => {
@@ -127,7 +127,7 @@ Promise.all([SB.voices(), SB.data()]).then(([V, D]) => {
       const ts = D.themes.filter((t) => t.category === c.id);
       return ts.length ? `<optgroup label="${SB.esc(c.name)}">${ts.map((t) => `<option value="${t.id}">${SB.esc(t.name)}</option>`).join("")}</optgroup>` : "";
     }).join("");
-    const remembered = SB.param("theme"); if (remembered && D.byId[remembered]) sel.value = remembered;
+    const remembered = SB.param("theme"); if (remembered && D.byId[remembered]) { sel.value = remembered; bundle.open = true; }
     const demo = document.getElementById("demo");
     const paintDemo = () => {
       const t = D.byId[sel.value];
@@ -163,7 +163,8 @@ Promise.all([SB.voices(), SB.data()]).then(([V, D]) => {
             zip.file(`SOUNDS/${v.lang}/${f}.wav`, await w.arrayBuffer()); n++;
           }));
         }
-        zip.file("README.txt", `${v.name} voice pack (${v.native})${t ? ` + ${t.name} sound theme` : ""}\n\nCopy the SOUNDS folder onto the root of your EdgeTX SD card and set\nRadio setup > Voice language to ${v.language}.\n${t ? `\n${n} alert files come from the ${t.name} theme; everything else is spoken by ${v.name}.\n` : ""}\nhttps://over9kfpv.github.io/stickbeats/voice.html?v=${v.id}${t ? "&theme=" + t.id : ""}\n`);
+        const voiceReadme = zip.file("README.txt") ? await zip.file("README.txt").async("string") : "";
+        zip.file("README.txt", `${voiceReadme}\n\nTheme audio: CC0 1.0. Voice audio: ${v.hosted ? "CC0 1.0" : "original EdgeTX license; see attribution above"}.\n\n${v.name} voice pack (${v.native})${t ? ` + ${t.name} sound theme` : ""}\n\nCopy the SOUNDS folder onto the root of your EdgeTX SD card and set\nRadio setup > Voice language to ${v.language}.\n${t ? `\n${n} alert files come from the ${t.name} theme; everything else is spoken by ${v.name}.\n` : ""}\nhttps://over9kfpv.github.io/stickbeats/voice.html?v=${v.id}${t ? "&theme=" + t.id : ""}\n`);
         status.textContent = "Compressing…";
         const blob = await zip.generateAsync({ type: "blob", compression: "DEFLATE", compressionOptions: { level: 6 } });
         const a = document.createElement("a");

@@ -17,7 +17,7 @@
   SB.voices = () => (voicesP = voicesP || fetch("data/voices.json").then((r) => (r.ok ? r.json() : { voices: [], languages: [], previews: [], english: {} })).then((d) => {
     d.byId = Object.fromEntries(d.voices.map((v) => [v.id, v]));
     d.hosted = d.voices.filter((v) => v.hosted);
-    d.packed = d.voices.filter((v) => v.pack);   // voices we serve as FLAC packs (premium + hosted official)
+    d.packed = d.voices.filter((v) => v.pack);   // voices we serve as FLAC packs (Stickbeats originals + hosted official)
     return d;
   }).catch(() => ({ voices: [], languages: [], previews: [], english: {}, byId: {}, hosted: [], packed: [] })));
   SB.param = (k) => new URLSearchParams(location.search).get(k);
@@ -112,7 +112,7 @@
   SB.progress = () => (cur ? Math.min(1, (ctx.currentTime - cur.t0) / cur.buf.duration) : 1);
 
   // ---------------------------------------------------------------- waveform
-  SB.scope = (canvas, colors) => {
+  SB.scope = (canvas, colors, accepts = () => true) => {
     const g = canvas.getContext("2d");
     const size = () => { const r = canvas.getBoundingClientRect(); canvas.width = Math.max(1, r.width * devicePixelRatio); canvas.height = Math.max(1, r.height * devicePixelRatio); };
     size();
@@ -133,7 +133,7 @@
       }
       if (p < 1) raf = requestAnimationFrame(draw);
     }
-    SB.onPlay((s) => { if (s.state === "play") { buf = s.buf; cancelAnimationFrame(raf); draw(); } else draw(); });
+    SB.onPlay((s) => { if (s.state === "play") { buf = accepts(s) ? s.buf : null; cancelAnimationFrame(raf); draw(); } else draw(); });
     draw();
   };
 

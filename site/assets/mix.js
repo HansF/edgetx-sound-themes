@@ -196,19 +196,46 @@
 
   // Recording/editor state is separate from saved clips until Use recording is pressed.
   const editor = $('editor'), editorStatus = $('editor-status');
-  let ctx, audio = null, previewURL = null, stream = null, recorder = null, source = null, analyser = null;
+  let ctx, playback = null, playbackGeneration = 0, stream = null, recorder = null, source = null, analyser = null;
   let timeout, frame, started = 0, generation = 0, editorFile = null, take = null, editorDirty = false, working = false;
   function context() { return ctx ||= new (window.AudioContext || window.webkitAudioContext)(); }
-  function stopAudio() {
-    SB.stop();
-    if (audio) { audio.pause(); audio.src = ''; audio = null; }
-    if (previewURL) { URL.revokeObjectURL(previewURL); previewURL = null; }
+  function stopPersonalAudio() {
+    playbackGeneration++;
+    if (playback) {
+      playback.onended = null;
+      try { playback.stop(); } catch (_) {}
+      playback.disconnect(); playback = null;
+    }
+    $('preview').dataset.playing = 'false';
+    $('preview').innerHTML = '<span aria-hidden="true">▶</span> Play recording';
+    $('stop-preview').disabled = true;
   }
-  SB.onPlay(s => { if (s.state === 'play' && audio) { audio.pause(); audio = null; if (previewURL) URL.revokeObjectURL(previewURL); previewURL = null; } });
-  async function playBlob(blob) {
-    stopAudio(); previewURL = URL.createObjectURL(blob); audio = new Audio(previewURL);
-    const current = audio; current.onended = () => { if (audio === current) stopAudio(); };
-    await current.play();
+  function stopAudio() { SB.stop(); stopPersonalAudio(); }
+  SB.onPlay(s => { if (s.state === 'play') stopPersonalAudio(); });
+  async function playBlob(blob, inEditor = false) {
+    stopAudio();
+    const my = playbackGeneration;
+    if (inEditor) $('stop-preview').disabled = false;
+    try {
+      // Use the recorder's audio context rather than a detached media element in a modal.
+      const ac = context();
+      await ac.resume();
+      const buffer = await ac.decodeAudioData(await blob.arrayBuffer());
+      if (my !== playbackGeneration) return;
+      const current = ac.createBufferSource(); current.buffer = buffer; current.connect(ac.destination);
+      playback = current;
+      current.onended = () => { if (playback === current) stopPersonalAudio(); };
+      current.start();
+      if (inEditor) {
+        $('preview').dataset.playing = 'true';
+        $('preview').innerHTML = '<span aria-hidden="true">↻</span> Replay recording';
+        $('stop-preview').disabled = false;
+      }
+    } catch (error) {
+      // Stop, a new preview, an edit or closing the dialog may supersede a pending decode.
+      if (my !== playbackGeneration) return;
+      stopPersonalAudio(); throw error;
+    }
   }
   async function play(f, el) {
     try {
@@ -295,7 +322,12 @@
   $('auto-trim').onclick = () => { stopAudio(); autoTrim(); };
   $('reset-trim').onclick = () => { stopAudio(); take.start = 0; take.end = take.samples.length / A.RATE; editorDirty = true; updateTrim(); };
   const output = () => A.wav(A.render(take.samples, take.start, take.end));
-  $('preview').onclick = async () => { try { await playBlob(output()); } catch (e) { editorStatus.textContent = `Preview failed: ${e.message}`; } };
+  $('preview').onclick = async () => {
+    // An earlier failed attempt must not remain visible when the user retries successfully.
+    if (editorStatus.textContent.startsWith('Preview failed:')) editorStatus.textContent = '';
+    try { await playBlob(output(), true); }
+    catch (e) { editorStatus.textContent = `Preview failed: ${e.message}`; }
+  };
   $('stop-preview').onclick = stopAudio;
   $('download-take').onclick = () => { try { download(output(), `${editorFile.split('/').pop()}.wav`); } catch (e) { editorStatus.textContent = e.message; } };
   $('save-clip').onclick = async () => {

@@ -113,6 +113,8 @@ Want game-style alert sounds on top of this voice? https://over9kfpv.github.io/s
 
 README = """{name} - EdgeTX voice pack ({native})
 Generated with ElevenLabs by Stickbeats. {note}
+Free audio: CC0 1.0 Universal (public domain dedication).
+https://creativecommons.org/publicdomain/zero/1.0/
 
 INSTALL
 1. Connect the radio in USB storage mode (or take the SD card out).
@@ -329,7 +331,7 @@ def build_voices(site: Path):
     write_static_pages(site, data)
     hosted = [v for v in voices if v["hosted"]]
     hosted_packs = [v for v in voices if v.get("pack")]
-    print(f"voices: {len(voices)} voices in {len(languages)} languages, {len(hosted)} premium, "
+    print(f"voices: {len(voices)} voices in {len(languages)} languages, {len(hosted)} made by Stickbeats, "
           f"{len(hosted_packs)} hosted ({sum(v['packSize'] for v in hosted_packs) / 1e6:.0f} MB of FLAC zips), {len(jobs)} clips, {time.time() - t0:.1f}s")
     return data
 
@@ -351,7 +353,7 @@ def write_static_pages(site: Path, data):
     for v in data["voices"]:
         g = {"m": "male", "f": "female"}.get(v["gender"], "synthetic")
         title = f"{v['name']} · {v['native']} EdgeTX voice pack ({g}) · Stickbeats"
-        kind = "Premium ElevenLabs voice pack, hosted here" if v["hosted"] else "Official EdgeTX voice pack"
+        kind = "Free CC0 voice pack made by Stickbeats" if v["hosted"] else "Official EdgeTX voice pack"
         desc = (f"{v['language']} ({v['native']}) voice pack for EdgeTX radios: {v['name']}, {g}, {v['engine']}. "
                 f"{v['note']} Listen to every phrase, then download SOUNDS/{v['lang']} for your SD card.").replace("  ", " ")
         phrases = sorted(v["texts"].items())

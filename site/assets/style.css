@@ -286,3 +286,16 @@ footer.site p { margin: 0; max-width: 62ch; }
 
 /* ---------- embedded request form */
 .gform { display: block; width: 100%; max-width: 640px; min-height: 900px; border: 0; margin-top: 16px; border-radius: 12px; background: #fff; }
+
+/* Separate homepage experiences: alert themes first, spoken languages second. */
+html { scroll-padding-top: 24px; }
+.free-note { font-weight: 600; color: var(--muted); }
+.language-section { border-top: 2px solid var(--line); margin-top: 48px; }
+.language-section h2 { font-size: clamp(30px, 4vw, 52px); letter-spacing: -.03em; }
+.voice-player { padding: clamp(18px, 3vw, 30px); border: 1px solid var(--line); border-radius: 18px; background: var(--panel); min-width: 0; }
+.voice-player label { display: block; font-weight: 600; margin: 16px 0 6px; }
+.voice-player select { width: 100%; min-width: 0; padding: 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--ground); color: var(--ink); font: inherit; }
+.voice-player .voice-strip { margin-bottom: 20px; }
+.voice-player button:disabled { opacity: .45; cursor: not-allowed; }
+.bundle summary { cursor: pointer; font-weight: 600; }
+.bundle[open] summary { margin-bottom: 16px; }

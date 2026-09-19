@@ -25,7 +25,7 @@
 <div class="wrap">
   <header class="top">
     <a class="logo" href="index.html"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="2" y="7" width="28" height="22" rx="7" fill="currentColor"/><circle cx="10" cy="18" r="4.2" fill="var(--ground)"/><circle cx="22" cy="18" r="4.2" fill="var(--ground)"/><circle cx="10" cy="18" r="1.6" fill="var(--accent)"/><circle cx="22" cy="18" r="1.6" fill="currentColor"/><rect x="24" y="1" width="2.4" height="8" rx="1.2" fill="currentColor"/></svg>Stickbeats</a>
-    <nav class="nav" aria-label="Main"><a href="voices.html">Voices</a><a href="index.html#themes">Themes</a><a href="compare.html">Compare</a><a href="mix.html">Mix</a><a href="install.html">Install</a><a href="request.html">Request</a><a href="https://github.com/Over9kfpv/stickbeats">GitHub</a></nav>
+    <nav class="nav" aria-label="Main"><a href="index.html#themes">Fun sound themes</a><a href="voices.html">Languages &amp; voices</a><a href="compare.html">Compare themes</a><a href="mix.html">Mix sounds</a><a href="install.html">Install</a><a href="request.html">Request</a><a href="https://github.com/Over9kfpv/stickbeats">GitHub</a></nav>
   </header>
 
   <p class="eyebrow">Mix your own</p>
@@ -52,7 +52,7 @@
   <div class="used" id="used"></div>
   <p id="status" aria-live="polite"></p>
   <div class="panel board"><table><tbody id="rows"></tbody></table></div>
-  <footer class="site"><p>The zip contains <code>SOUNDS/en/…</code> with all 70 files, exactly like the ready-made packs. Pick a <a href="voices.html">voice pack</a> above and the zip becomes a complete language folder: the voice speaks numbers and callouts, your mix does the alerts. <a href="install.html">Install guide</a>.</p></footer>
+  <footer class="site"><p>Free downloads · Open source. Original theme sounds and Stickbeats voices: CC0. Code: MIT. Third-party voices retain their original licenses.</p><p>The zip contains <code>SOUNDS/en/…</code> with all 70 files, exactly like the ready-made packs. Pick a <a href="voices.html">voice pack</a> above and the zip becomes a complete language folder: the voice speaks numbers and callouts, your mix does the alerts. <a href="install.html">Install guide</a>.</p></footer>
 </div>
 <dialog id="editor" aria-labelledby="editor-title">
   <div class="editor-head"><h2 id="editor-title">Record a sound</h2><button type="button" class="btn ghost" id="close-editor" aria-label="Close recording editor">Close</button></div>
@@ -67,7 +67,7 @@
   <div id="trim-tools" hidden>
     <div class="preview-controls" role="group" aria-label="Listen to your recording">
       <button class="btn accent" type="button" id="preview" title="Play the selected part of your recording"><span aria-hidden="true">▶</span> Play recording</button>
-      <button class="btn ghost" type="button" id="stop-preview">Stop playback</button>
+      <button class="btn ghost" type="button" id="stop-preview" disabled>Stop playback</button>
     </div>
     <canvas id="waveform" role="img" aria-label="Recorded waveform. Use the start and end controls below to select audio."></canvas>
     <div class="trim-inputs">

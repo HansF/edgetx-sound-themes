@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Stickbeats · voices and sound themes for EdgeTX</title>
-<meta name="description" content="Premium voice packs for EdgeTX radios in 16 languages, including Dutch and Flemish, plus 30 free sound themes: chiptune, space opera, theme parks, phonk. Listen, then download a ready-to-copy SD card folder.">
-<meta property="og:title" content="Stickbeats · voices and sound themes for EdgeTX">
-<meta property="og:description" content="Listen to every voice and every alert before you download. Voice packs in 16 languages, 30 sound themes, and a builder that combines them.">
+<title>Stickbeats · free fun sound themes and languages for EdgeTX</title>
+<meta name="description" content="Free fun sound themes for EdgeTX: retro games, sci-fi and more. Explore languages and voices in a separate player. Original audio is CC0; code is open source.">
+<meta property="og:title" content="Stickbeats · free fun sound themes and languages for EdgeTX">
+<meta property="og:description" content="Find your fun sound theme, or explore a new language for your radio. Separate previews, free downloads, CC0 original audio and open source code.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://over9kfpv.github.io/stickbeats/">
 <link rel="canonical" href="https://over9kfpv.github.io/stickbeats/">
@@ -24,24 +24,24 @@
 </style>
 </head>
 <body>
-<a class="skip" href="#doors">Skip to content</a>
+<a class="skip" href="#themes">Skip to content</a>
 <div class="wrap">
   <header class="top">
     <a class="logo" href="index.html"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="2" y="7" width="28" height="22" rx="7" fill="currentColor"/><circle cx="10" cy="18" r="4.2" fill="var(--ground)"/><circle cx="22" cy="18" r="4.2" fill="var(--ground)"/><circle cx="10" cy="18" r="1.6" fill="var(--accent)"/><circle cx="22" cy="18" r="1.6" fill="currentColor"/><rect x="24" y="1" width="2.4" height="8" rx="1.2" fill="currentColor"/></svg>Stickbeats</a>
-    <nav class="nav" aria-label="Main"><a href="voices.html">Voices</a><a href="index.html#themes">Themes</a><a href="compare.html">Compare</a><a href="mix.html">Mix</a><a href="install.html">Install</a><a href="request.html">Request</a><a href="https://github.com/Over9kfpv/stickbeats">GitHub</a></nav>
+    <nav class="nav" aria-label="Main"><a href="index.html#themes">Fun sound themes</a><a href="voices.html">Languages &amp; voices</a><a href="compare.html">Compare themes</a><a href="mix.html">Mix sounds</a><a href="install.html">Install</a><a href="request.html">Request</a><a href="https://github.com/Over9kfpv/stickbeats">GitHub</a></nav>
   </header>
 
   <section class="hero">
     <div>
-      <p class="eyebrow">Audio for EdgeTX radios</p>
-      <h1>Your radio, in your <em>voice</em>. With a soundtrack.</h1>
-      <p class="lede">Voice packs that speak every callout in <b id="n-langs">16 languages</b>, including Dutch and Flemish, which EdgeTX never had. And <b id="n-themes">30</b> sound themes that turn beeps into 8-bit pickups, starship klaxons or phonk cowbells. Everything is playable here before you copy a single folder.</p>
-      <div class="ctas"><a class="btn accent" href="voices.html">Pick a voice</a><a class="btn ghost" href="#themes">Browse themes</a></div>
-      <div class="voice-strip" id="voice-strip" aria-label="Hear a voice"></div>
+      <p class="eyebrow">Fun sound themes for EdgeTX radios</p>
+      <h1>Give your radio a <em>fun soundtrack.</em></h1>
+      <p class="lede"><b id="n-themes">30</b> free sound themes turn alerts into 8-bit pickups, starship klaxons or phonk cowbells. Pick a theme and hear its boot, arm and warning sounds.</p>
+      <p class="free-note">Free downloads · Open source · CC0 original audio</p>
+      <div class="ctas"><a class="btn accent" href="#themes">Browse fun themes</a><a class="btn ghost" href="#languages">Languages &amp; voices →</a></div>
     </div>
 
-    <div class="radio" aria-label="Try it">
-      <div class="radio-row"><span class="radio-brand">Try it · pick a voice and a theme</span><span class="led" id="led"></span></div>
+    <div class="radio" aria-label="Fun sound theme player">
+      <div class="radio-row"><span class="radio-brand">Try a fun sound theme</span><span class="led" id="led"></span></div>
       <div class="lcd">
         <div class="lcd-top"><span id="lcd-cat">—</span><span id="lcd-dur"></span></div>
         <div class="lcd-name" id="lcd-name">Loading…</div>
@@ -54,7 +54,6 @@
           <span class="tlabel">Switch SA<b id="arm-state">Disarmed</b></span>
         </button>
         <div style="display:grid;gap:12px;min-width:0">
-          <div class="selector" id="voice-row"><span class="lbl">Voice</span><label for="voice-select" hidden>Voice</label><select id="voice-select"></select></div>
           <div class="selector"><span class="lbl">Theme</span>
             <button class="round" id="prev" type="button" aria-label="Previous theme">◀</button>
             <label for="theme-select" hidden>Theme</label>
@@ -67,34 +66,36 @@
     </div>
   </section>
 
-  <section class="doors" id="doors">
-    <a class="door voices" href="voices.html">
-      <p class="eyebrow">Voice packs</p>
-      <h2>Speak my language</h2>
-      <p><span id="d-voices">Dozens of</span> voices in <span id="d-langs">16</span> languages. Premium ElevenLabs voices made here, every clip checked by transcription, plus all official EdgeTX packs.</p>
-      <span class="go">Listen to the voices →</span>
-      <span class="art" aria-hidden="true">🗣</span>
-    </a>
-    <a class="door themes" href="#themes">
-      <p class="eyebrow">Sound themes</p>
-      <h2>Make it sound like a game</h2>
-      <p><span id="d-themes">30</span> packs of original alert sounds, composed in MIDI: consoles, PCs, sci-fi, tycoons, memes. Combine any theme with any voice.</p>
-      <span class="go">Browse the themes ↓</span>
-      <span class="art" aria-hidden="true">♪</span>
-    </a>
-  </section>
-
   <section id="themes">
     <div class="section-head">
-      <h2>Pick a sound theme</h2>
+      <h2>Pick a fun sound theme</h2>
       <div class="filters" id="filters" role="group" aria-label="Filter by category"></div>
     </div>
+    <p>Themes replace 70 alert sounds. Your spoken numbers and units stay as they are. All theme audio is free and CC0.</p>
     <div class="grid" id="grid"></div>
     <p style="margin-top:22px;color:var(--muted)">Want all of them? <a id="all-dl" href="dl/all-themes.zip" download>Download every pack in one zip</a>. Want one per event? <a href="mix.html">Mix your own</a>.</p>
   </section>
 
+  <section class="hero language-section" id="languages" aria-labelledby="language-heading">
+    <div>
+      <p class="eyebrow">Languages &amp; voices</p>
+      <h2 id="language-heading">Your radio, in your language.</h2>
+      <p class="lede">Looking for translated speech or a different voice? Voice packs provide spoken numbers, units and callouts. Choose a language and listen here.</p>
+      <p>Free downloads. Voices made by Stickbeats are CC0; official EdgeTX packs retain their original licenses.</p>
+      <a class="btn accent" href="voices.html">Browse all languages &amp; voices</a>
+    </div>
+    <div class="voice-player" aria-label="Language and voice player">
+      <p class="eyebrow">Hear a voice</p>
+      <label for="language-select">Language</label><select id="language-select" disabled></select>
+      <label for="voice-select">Voice</label><select id="voice-select" disabled></select>
+      <p id="voice-status" aria-live="polite">Loading voices…</p>
+      <div class="voice-strip" id="voice-keys"></div>
+      <a id="voice-details" hidden>Voice details &amp; free download →</a>
+    </div>
+  </section>
+
   <footer class="site">
-    <p>Themes are CC0: use them however you like. Hosted voices are generated with ElevenLabs and free to use on your radio. Code is MIT. Stickbeats is a fan project, not affiliated with EdgeTX, ElevenLabs, or any game, film or TV show; the themes are original music in the spirit of their eras.</p>
+    <p>Free downloads · Open source. Stickbeats original themes and voices: CC0. Code: MIT. Third-party voice packs retain their original licenses. Stickbeats is a fan project, not affiliated with EdgeTX, ElevenLabs, or any game, film or TV show; the themes are original music in the spirit of their eras.</p>
     <p><a href="install.html">How to install</a> · <a href="https://github.com/Over9kfpv/stickbeats">Source on GitHub</a></p>
   </footer>
 </div>
@@ -115,22 +116,12 @@ const VOICE_KEYS = [
 const CARD_SAMPLES = [["armed", "Arm"], ["disarm", "Disarm"], ["lowbat", "Low batt"], ["sigcrt", "Signal crit"], ["flip", "Flip"]];
 
 SB.markNav();
-Promise.all([SB.data(), SB.voices()]).then(([D, V]) => {
+SB.nowbar();
+SB.data().then((D) => {
+  if (!D.themes.length) throw new Error('No themes');
   SB.loadFonts(D.themes.map((t) => t.skin.font));
   document.getElementById("n-themes").textContent = D.themes.length;
-  document.getElementById("d-themes").textContent = D.themes.length;
-  if (V.voices.length) {
-    document.getElementById("n-langs").textContent = `${V.languages.length} languages`;
-    document.getElementById("d-langs").textContent = V.languages.length;
-    document.getElementById("d-voices").textContent = V.voices.length;
-  }
   document.getElementById("all-dl").textContent = `Download every pack in one zip (${SB.size(D.allzip)})`;
-
-  // ---------- voice strip: one "hello" per hosted voice
-  const strip = document.getElementById("voice-strip");
-  strip.innerHTML = V.hosted.filter((v) => v.clips["SYSTEM/hello"]).map((v) =>
-    `<button class="phrase" type="button" data-v="${v.id}" title="${SB.esc(v.native)}">${SB.PLAY_SVG}<span class="flag" aria-hidden="true">${v.flag}</span><span>${SB.esc(v.name)}</span></button>`).join("");
-  strip.onclick = (e) => { const b = e.target.closest("[data-v]"); if (!b) return; const v = V.byId[b.dataset.v]; SB.play(v.clips["SYSTEM/hello"], { text: `${v.flag} ${v.name} · ${SB.phraseText(V, v, "SYSTEM/hello")}` }, b); };
 
   // ---------- hero transmitter
   const sel = document.getElementById("theme-select");
@@ -140,46 +131,33 @@ Promise.all([SB.data(), SB.voices()]).then(([D, V]) => {
     D.themes.filter((t) => t.category === c.id).forEach((t) => og.appendChild(new Option(t.name, t.id)));
     if (og.children.length) sel.appendChild(og);
   });
-  const vsel = document.getElementById("voice-select");
-  vsel.appendChild(new Option("No voice pack", ""));
-  V.hosted.forEach((v) => vsel.appendChild(new Option(`${v.flag} ${v.name} · ${v.native}`, v.id)));
-  if (V.hosted.length) vsel.value = V.hosted[0].id;
-  document.getElementById("voice-row").hidden = !V.hosted.length;
   const ids = D.themes.map((t) => t.id);
   const start = (location.hash.slice(1) && D.byId[location.hash.slice(1)]) ? location.hash.slice(1) : ids[Math.floor(Math.random() * ids.length)];
   sel.value = start;
   const theme = () => D.byId[sel.value];
-  const voice = () => V.byId[vsel.value];
   const lcd = (name, sub, dur) => {
     document.getElementById("lcd-name").textContent = name;
     document.getElementById("lcd-sub").textContent = sub;
     document.getElementById("lcd-dur").textContent = dur || "";
   };
   const showTheme = () => {
-    const t = theme(), v = voice();
-    document.getElementById("lcd-cat").textContent = D.catName[t.category] + (v ? ` · ${v.flag} ${v.name}` : "");
+    const t = theme();
+    document.getElementById("lcd-cat").textContent = D.catName[t.category];
     lcd(t.name, t.tagline);
   };
   showTheme();
   const fire = (file, el) => {
     const t = theme();
     const ev = D.eventBy[file];
-    lcd(t.name, `${ev.label} · SOUNDS/${voice() ? voice().lang : "en"}/${file}.wav`, t.durs[file].toFixed(2) + "s");
-    SB.play(t.clips[file], { text: `${t.name} · ${ev.label}` }, el);
-  };
-  const say = (files, label, el) => {
-    const v = voice(); if (!v) return;
-    const seq = files.filter((f) => v.clips[f]);
-    lcd(`${v.name} says`, `“${seq.map((f) => SB.phraseText(V, v, f)).join(" ")}”`, "");
-    SB.playSeq(seq.map((f) => ({ hash: v.clips[f], el, info: { text: `${v.flag} ${v.name} · ${label}` } })));
+    lcd(t.name, `${ev.label}`, t.durs[file].toFixed(2) + "s");
+    SB.play(t.clips[file], { text: `${t.name} · ${ev.label}`, source: "theme" }, el);
   };
   const step = (d) => { sel.value = ids[(ids.indexOf(sel.value) + d + ids.length) % ids.length]; showTheme(); fire("SYSTEM/hello"); };
   sel.onchange = () => { showTheme(); fire("SYSTEM/hello"); };
-  vsel.onchange = () => { showTheme(); paintVoiceKeys(); if (voice()) say(["SYSTEM/hello"], "hello"); };
   document.getElementById("prev").onclick = () => step(-1);
   document.getElementById("next").onclick = () => step(1);
   const keys = document.getElementById("keys");
-  const paintVoiceKeys = () => {
+  const paintThemeKeys = () => {
     keys.innerHTML = "";
     KEYS.forEach(([file, label, cls]) => {
       const b = document.createElement("button");
@@ -187,16 +165,9 @@ Promise.all([SB.data(), SB.voices()]).then(([D, V]) => {
       b.onclick = () => fire(file, b);
       keys.appendChild(b);
     });
-    if (!voice()) return;
-    const sep = document.createElement("span"); sep.className = "sep"; sep.textContent = "spoken by the voice pack"; keys.appendChild(sep);
-    VOICE_KEYS.forEach(([files, label]) => {
-      const b = document.createElement("button");
-      b.className = "key voice"; b.type = "button"; b.textContent = label;
-      b.onclick = () => say(files, label, b);
-      keys.appendChild(b);
-    });
+
   };
-  paintVoiceKeys();
+  paintThemeKeys();
   const arm = document.getElementById("arm");
   arm.onclick = () => {
     const on = arm.getAttribute("aria-checked") !== "true";
@@ -205,9 +176,9 @@ Promise.all([SB.data(), SB.voices()]).then(([D, V]) => {
     fire(on ? "armed" : "disarm");
   };
   const led = document.getElementById("led");
-  SB.onPlay((s) => led.classList.toggle("on", s.state === "play"));
+  SB.onPlay((s) => led.classList.toggle("on", s.state === "play" && !!s.info?.text?.startsWith(theme().name + " ·")));
   const css = getComputedStyle(document.documentElement);
-  SB.scope(document.getElementById("lcd-scope"), () => ({ ink: css.getPropertyValue("--lcd-ink"), dim: css.getPropertyValue("--lcd-dim") }));
+  SB.scope(document.getElementById("lcd-scope"), () => ({ ink: css.getPropertyValue("--lcd-ink"), dim: css.getPropertyValue("--lcd-dim") }), s => s.info?.source === "theme");
 
   // ---------- grid
   const grid = document.getElementById("grid");
@@ -231,7 +202,7 @@ Promise.all([SB.data(), SB.voices()]).then(([D, V]) => {
     const b = e.target.closest("[data-t]");
     if (!b) return;
     const t = D.byId[b.dataset.t];
-    SB.play(t.clips[b.dataset.f], { text: `${t.name} · ${D.eventBy[b.dataset.f].label}` }, b);
+    SB.play(t.clips[b.dataset.f], { text: `${t.name} · ${D.eventBy[b.dataset.f].label}`, source: "theme" }, b);
   });
 
   // ---------- filters
@@ -245,6 +216,46 @@ Promise.all([SB.data(), SB.voices()]).then(([D, V]) => {
     filters.querySelectorAll(".chip").forEach((x) => x.setAttribute("aria-pressed", x === b));
     grid.querySelectorAll(".card").forEach((card) => (card.hidden = b.dataset.c && card.dataset.cat !== b.dataset.c));
   };
+ }).catch(() => {
+  document.getElementById("lcd-name").textContent = "Themes unavailable";
+  document.getElementById("grid").textContent = "Could not load the themes. Please try again later.";
+  document.querySelectorAll('.radio button, .radio select').forEach(el => el.disabled = true);
+});
+
+SB.voices().then((V) => {
+  const language = document.getElementById('language-select'), voice = document.getElementById('voice-select');
+  const status = document.getElementById('voice-status'), keys = document.getElementById('voice-keys');
+  if (!V.voices.length) { status.textContent = 'Voices are unavailable. Please try again later.'; return; }
+  V.languages.forEach(l => language.add(new Option(`${l.flag} ${l.language}`, l.lang)));
+  language.disabled = false;
+  const showVoice = () => {
+    SB.stop();
+    const v = V.byId[voice.value];
+    keys.replaceChildren();
+    if (!v) { status.textContent = 'No voices available for this language.'; return; }
+    status.textContent = `${v.name} · ${v.native} · ${v.hosted ? 'Free · CC0' : 'Free · Original EdgeTX license'}`;
+    const details = document.getElementById('voice-details');
+    details.href = `v/${v.id}.html`; details.hidden = false;
+    [[['SYSTEM/hello'], 'Welcome'], ...VOICE_KEYS].forEach(([files, label]) => {
+      const button = document.createElement('button');
+      button.type = 'button'; button.className = 'phrase'; button.textContent = label;
+      button.disabled = !files.every(f => v.clips[f]);
+      if (button.disabled) button.title = 'This preview is unavailable for this voice';
+      button.onclick = () => {
+        status.textContent = `${v.name} · ${files.map(f => SB.phraseText(V, v, f)).join(' ')}`;
+        SB.playSeq(files.map(f => ({hash: v.clips[f], el: button, info: {text: `${v.name} · ${SB.phraseText(V, v, f)}`}})));
+      };
+      keys.appendChild(button);
+    });
+  };
+  const showLanguage = () => {
+    voice.replaceChildren();
+    V.voices.filter(v => v.lang === language.value).forEach(v => voice.add(new Option(v.name, v.id)));
+    voice.disabled = !voice.options.length;
+    showVoice();
+  };
+  language.onchange = showLanguage; voice.onchange = showVoice;
+  showLanguage();
 });
 </script>
 </body>

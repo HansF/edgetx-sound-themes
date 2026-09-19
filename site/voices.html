@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Voice packs · Stickbeats</title>
-<meta name="description" content="EdgeTX voice packs in 16 languages: listen before you download. Premium ElevenLabs voices in Dutch and English made here, plus every official EdgeTX pack.">
+<meta name="description" content="EdgeTX voice packs in 16 languages: listen before you download. Free CC0 voices in Dutch and English made here, plus every official EdgeTX pack.">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,7 +33,7 @@
 <div class="wrap">
   <header class="top">
     <a class="logo" href="index.html"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="2" y="7" width="28" height="22" rx="7" fill="currentColor"/><circle cx="10" cy="18" r="4.2" fill="var(--ground)"/><circle cx="22" cy="18" r="4.2" fill="var(--ground)"/><circle cx="10" cy="18" r="1.6" fill="var(--accent)"/><circle cx="22" cy="18" r="1.6" fill="currentColor"/><rect x="24" y="1" width="2.4" height="8" rx="1.2" fill="currentColor"/></svg>Stickbeats</a>
-    <nav class="nav" aria-label="Main"><a href="voices.html">Voices</a><a href="index.html#themes">Themes</a><a href="compare.html">Compare</a><a href="mix.html">Mix</a><a href="install.html">Install</a><a href="request.html">Request</a><a href="https://github.com/Over9kfpv/stickbeats">GitHub</a></nav>
+    <nav class="nav" aria-label="Main"><a href="index.html#themes">Fun sound themes</a><a href="voices.html">Languages &amp; voices</a><a href="compare.html">Compare themes</a><a href="mix.html">Mix sounds</a><a href="install.html">Install</a><a href="request.html">Request</a><a href="https://github.com/Over9kfpv/stickbeats">GitHub</a></nav>
   </header>
 
   <section class="v-intro">
@@ -55,9 +55,9 @@
   </div>
 
   <div id="list">
-    <div class="subhead" id="h-hosted"><h2>Made here, premium</h2><p>Generated with ElevenLabs, every clip machine-checked by transcribing it back. Hosted on this site.</p></div>
+    <div class="subhead" id="h-hosted"><h2>Made by Stickbeats · Free &amp; CC0</h2><p>Generated with ElevenLabs, every clip machine-checked by transcribing it back. Hosted on this site.</p></div>
     <div class="vgrid" id="hosted"></div>
-    <div class="subhead" id="h-official"><h2>Official EdgeTX packs</h2><p>Azure neural voices from the <a id="rel-link" href="https://github.com/EdgeTX/edgetx-sdcard-sounds/releases">EdgeTX release</a>. Previews here, download from GitHub.</p></div>
+    <div class="subhead" id="h-official"><h2>Official EdgeTX packs</h2><p>Azure neural voices from the <a id="rel-link" href="https://github.com/EdgeTX/edgetx-sdcard-sounds/releases">EdgeTX release</a>. Free downloads. <a href="https://github.com/EdgeTX/edgetx-sdcard-sounds">Original sources and licenses</a>; these third-party packs are not covered by Stickbeats’ CC0 dedication.</p></div>
     <div class="vgrid" id="official"></div>
   </div>
 
@@ -66,12 +66,12 @@
     <div class="howto">
       <div><b>One folder per language</b>The zip holds <code>SOUNDS/nl</code> (or <code>en</code>, <code>de</code>…). Copy <code>SOUNDS</code> to the root of the SD card; existing files are replaced.</div>
       <div><b>Tell the radio</b>Radio setup → <em>Voice language</em>. Pick the language of the folder. Two voices of the same language share a folder, so install one at a time.</div>
-      <div><b>Mix with a theme</b>A voice speaks the numbers and callouts; a <a href="index.html#themes">sound theme</a> replaces the 70 alert files. Open a hosted voice to download the two combined in one zip.</div>
+      <div><b>Optional: add a fun theme</b>A voice speaks the numbers and callouts; a <a href="index.html#themes">sound theme</a> replaces the 70 alert files. Open a hosted voice to download the two combined in one zip.</div>
     </div>
   </section>
 
   <footer class="site">
-    <p>Hosted voices are generated with ElevenLabs for this project and free to use on your radio. Official packs are © their EdgeTX contributors. Stickbeats is not affiliated with EdgeTX or ElevenLabs.</p>
+    <p>Free downloads · Open source. Stickbeats original themes and voices: CC0. Code: MIT. Third-party voice packs retain their original licenses. Stickbeats is not affiliated with EdgeTX or ElevenLabs.</p>
     <p><a href="install.html">How to install</a> · <a href="https://github.com/HansF/edgetx-sdcard-sounds">Voice sources on GitHub</a></p>
   </footer>
 </div>
@@ -85,7 +85,7 @@ SB.nowbar();
 SB.voices().then((V) => {
   document.getElementById("f-voices").textContent = V.voices.length;
   document.getElementById("f-langs").textContent = V.languages.length;
-  document.getElementById("f-files").textContent = (V.hosted[0] || V.voices[0]).files;
+  document.getElementById("f-files").textContent = (V.hosted[0] || V.voices[0])?.files || "–";
   if (V.release) { const a = document.getElementById("rel-link"); a.href = V.release.url; a.textContent = `EdgeTX ${V.release.tag} release`; }
 
   const CARD = ["SYSTEM/hello", "armed", "lowbat", "SYSTEM/telemko", "SYSTEM/0012", "SYSTEM/volt1", "rth"];
@@ -98,7 +98,7 @@ SB.voices().then((V) => {
     return `<article class="vcard ${v.hosted ? "hosted" : ""}" data-id="${v.id}" data-lang="${v.lang}" data-kind="${v.hosted ? "hosted" : "official"}" data-g="${v.gender}">
       <div class="vhead"><span class="flag" aria-hidden="true">${v.flag}</span>
         <div class="who"><span class="native">${SB.esc(v.native)}</span><h3>${SB.esc(v.name)}<small>${SB.GENDER[v.gender] || ""}</small></h3></div>
-        ${v.hosted ? '<span class="badge hot">Premium</span>' : ""}
+        ${v.hosted ? '<span class="badge hot">Free · CC0</span>' : '<span class="badge">Free · Third-party license</span>'}
       </div>
       ${v.note ? `<p class="vnote">${SB.esc(v.note)}</p>` : ""}
       <div class="vmeta"><span class="badge">${SB.esc(v.engine)}</span><span class="badge">${v.files} files</span>${v.hosted && v.checked ? `<span class="badge ok" title="${v.verified} of ${v.checked} clips transcribed back to the intended text">${Math.round(100 * v.verified / v.checked)}% verified</span>` : ""}</div>
@@ -129,7 +129,7 @@ SB.voices().then((V) => {
   langs.innerHTML = `<span class="lbl">Language</span><button class="chip" data-lang="" aria-pressed="true">All <span class="n">${V.voices.length}</span></button>` +
     V.languages.map((l) => `<button class="chip" data-lang="${l.lang}" aria-pressed="false"><span class="f">${l.flag}</span>${SB.esc(l.language)}<span class="n">${V.voices.filter((v) => v.lang === l.lang).length}</span></button>`).join("");
   const kinds = document.getElementById("kinds");
-  kinds.innerHTML = `<span class="lbl">Show</span>` + [["", "Everything"], ["hosted", "Premium only"], ["m", "Male"], ["f", "Female"]].map(([k, l]) => `<button class="chip" data-kind="${k}" aria-pressed="${k === ""}">${l}</button>`).join("");
+  kinds.innerHTML = `<span class="lbl">Show</span>` + [["", "Everything"], ["hosted", "Made by Stickbeats"], ["m", "Male"], ["f", "Female"]].map(([k, l]) => `<button class="chip" data-kind="${k}" aria-pressed="${k === ""}">${l}</button>`).join("");
   const apply = () => {
     const wanted = (v) => (!state.lang || v.lang === state.lang) && (!state.kind || (state.kind === "hosted" ? v.hosted : v.gender === state.kind));
     let nh = 0, no = 0;

@@ -78,8 +78,34 @@ const A = require('../../site/assets/mix-audio.js');
     const previewBox = await page.locator('#preview').boundingBox();
     const editorBox = await page.locator('#editor').boundingBox();
     assert.ok(previewBox.y >= editorBox.y && previewBox.y + previewBox.height <= Math.min(844, editorBox.y + editorBox.height), 'Play recording must be visible after recording without scrolling');
+    await page.evaluate(() => { document.querySelector('#editor-status').textContent = 'Preview failed: old interrupted playback'; });
     await page.locator('#preview').click();
+    await page.waitForFunction(() => document.querySelector('#preview').dataset.playing === 'true');
+    await page.waitForFunction(() => document.querySelector('#preview').dataset.playing === 'false');
+    assert.doesNotMatch(await page.locator('#editor-status').textContent(), /Preview failed/);
+    await page.locator('#preview').click();
+    await page.waitForFunction(() => document.querySelector('#preview').dataset.playing === 'true');
     await page.locator('#stop-preview').click();
+    assert.equal(await page.locator('#preview').getAttribute('data-playing'), 'false');
+    // A late decode must not start audio or report an error after the user stops/restarts.
+    await page.evaluate(() => {
+      window.realDecode = AudioContext.prototype.decodeAudioData;
+      AudioContext.prototype.decodeAudioData = function (bytes) {
+        return new Promise((resolve, reject) => {
+          window.finishPreviewDecode = () => window.realDecode.call(this, bytes).then(resolve, reject);
+        });
+      };
+    });
+    await page.locator('#preview').click();
+    await page.waitForFunction(() => !!window.finishPreviewDecode);
+    await page.locator('#stop-preview').click();
+    await page.evaluate(async () => { await window.finishPreviewDecode(); AudioContext.prototype.decodeAudioData = window.realDecode; });
+    assert.equal(await page.locator('#preview').getAttribute('data-playing'), 'false');
+    assert.doesNotMatch(await page.locator('#editor-status').textContent(), /Preview failed/);
+    await page.locator('#preview').dblclick();
+    await page.waitForFunction(() => document.querySelector('#preview').dataset.playing === 'true');
+    await page.locator('#stop-preview').click();
+    assert.doesNotMatch(await page.locator('#editor-status').textContent(), /Preview failed/);
     await page.locator('#save-clip').click();
     await page.waitForFunction(() => document.querySelector('#saved-state').textContent === 'Saved in this browser.');
     let stored = await page.evaluate(async () => { const p = await MixStore.load(); const c = p.clips.get('SYSTEM/hello'); return { count: p.clips.size, duration: c.end - c.start, original: c.samples.length }; });
@@ -116,6 +142,8 @@ const A = require('../../site/assets/mix-audio.js');
     zip = await JSZip.loadAsync(await fs.readFile(await download.path()));
     assert.equal(Object.keys(zip.files).filter(f => f.endsWith('.wav')).length, 71);
     assert.ok(zip.file('SOUNDS/nl/SYSTEM/0000.wav')); assert.ok(zip.file('SOUNDS/nl/SYSTEM/hello.wav'));
+    assert.equal(Object.keys(zip.files).filter(f => f.endsWith('.flac')).length, 0);
+    assert.deepEqual(new Uint8Array(await zip.file('SOUNDS/nl/SYSTEM/0000.wav').async('uint8array')), new Uint8Array(wav));   // FLAC round trip is lossless
     assert.equal(await zip.file('VOICE-README.txt').async('string'), 'Original voice attribution');
     // Legacy links load only theme selections, leaving the local recording untouched.
     await page.goto(url + '#' + '00'.repeat(70)); await page.waitForFunction(() => document.querySelector('#resume') && !document.querySelector('#resume').hidden);
@@ -142,8 +170,6 @@ const A = require('../../site/assets/mix-audio.js');
       window.realGetUserMedia = navigator.mediaDevices.getUserMedia;
       navigator.mediaDevices.getUserMedia = () => new Promise(resolve => { window.finishPermission = resolve; });
     });
-    assert.equal(Object.keys(zip.files).filter(f => f.endsWith('.flac')).length, 0);
-    assert.deepEqual(new Uint8Array(await zip.file('SOUNDS/nl/SYSTEM/0000.wav').async('uint8array')), new Uint8Array(wav));   // FLAC round trip is lossless
     await page.locator('#record').click();
     await page.waitForFunction(() => !!window.finishPermission);
     await page.locator('#close-editor').click();

@@ -16,3 +16,4 @@ site/robots.txt
 
 node_modules/
 .flac-cache/
+.mp3-cache/

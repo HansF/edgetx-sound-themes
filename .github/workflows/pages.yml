@@ -50,6 +50,48 @@ jobs:
           curl -fsSL -o ~/.cache/edgetx-sound-themes/GeneralUser-GS.sf2 \
             "https://raw.githubusercontent.com/mrbumpy409/GeneralUser-GS/${SF2_COMMIT}/GeneralUser-GS.sf2"
 
+      - uses: astral-sh/setup-uv@v6
+
+      - name: Cache FLAC and MP3 conversions (keyed by content hash, so any old cache is safe to reuse)
+        uses: actions/cache@v4
+        with:
+          path: |
+            .flac-cache
+            .mp3-cache
+          key: media-${{ github.run_id }}
+          restore-keys: |
+            media-
+            flac-
+
+      - name: Build packs and site
+        run: uv run build.py --site
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install FluidSynth
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends fluidsynth
+
+      - name: Cache soundfont
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/edgetx-sound-themes/GeneralUser-GS.sf2
+          key: sf2-${{ env.SF2_COMMIT }}
+
+      - name: Download GeneralUser GS soundfont
+        run: |
+          [ -f ~/.cache/edgetx-sound-themes/GeneralUser-GS.sf2 ] && exit 0
+          mkdir -p ~/.cache/edgetx-sound-themes
+          curl -fsSL -o ~/.cache/edgetx-sound-themes/GeneralUser-GS.sf2 \
+            "https://raw.githubusercontent.com/mrbumpy409/GeneralUser-GS/${SF2_COMMIT}/GeneralUser-GS.sf2"
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -67,23 +109,8 @@ jobs:
       - name: Test every theme
         run: uv run pytest -q
 
-      - name: Cache FLAC conversions (keyed by content hash, so any old cache is safe to reuse)
-        uses: actions/cache@v4
-        with:
-          path: .flac-cache
-          key: flac-${{ github.run_id }}
-          restore-keys: flac-
-
-      - name: Build packs and site
-        run: uv run build.py --site
-
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: site
-
   deploy:
-    needs: build
+    needs: [build, test]
     runs-on: ubuntu-latest
     environment:
       name: github-pages

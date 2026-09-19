@@ -144,12 +144,20 @@ def _hash(p: Path):
 
 def _mp3(args):
     wav, mp3 = args
-    if not mp3.exists():
+    if mp3.exists():
+        return
+    cached = MP3_CACHE / mp3.name          # content-hash named, survives site_build pruning and CI runs
+    if not cached.exists():
+        MP3_CACHE.mkdir(exist_ok=True)
+        tmp = cached.with_name(f"{cached.stem}.{threading.get_ident()}.tmp")
         subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-i", str(wav),
-                        "-ac", "1", "-ar", "32000", "-b:a", "48k", str(mp3)], check=True)
+                        "-ac", "1", "-ar", "32000", "-b:a", "48k", "-f", "mp3", str(tmp)], check=True)
+        tmp.replace(cached)
+    shutil.copyfile(cached, mp3)
 
 
 FLAC_CACHE = ROOT / ".flac-cache"
+MP3_CACHE = ROOT / ".mp3-cache"
 PACK_RATE = 16000
 
 
